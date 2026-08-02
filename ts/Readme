@@ -1,0 +1,4 @@
+npm i -D tsx --> isko bhi install karna
+
+npx tsx script.ts --> then run it 
+
