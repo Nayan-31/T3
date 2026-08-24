@@ -1086,3 +1086,380 @@
 
 // let arr = [2 , 0 , 2 ,1 ,1 ,0]
 // console.log(sortArr(arr))
+
+
+//______________________________________________________
+
+// function majorityElement(nums){
+//   let n = nums.length
+  
+//   for(let i = 0 ; i < n ; i++){
+
+//     let count = 0 
+
+//   for(let j = 0 ; j < n ; j++){
+//      if(nums[i] === nums[j]){
+//        count++
+//      }
+//   }
+
+//   if(count > Math.floor(n / 2)){
+//        return nums[i]
+//   }
+//   }
+//   return -1
+// }
+
+// let nums = [7, 0, 0, 1, 7, 7, 2, 7, 7]
+// console.log(majorityElement(nums))
+
+
+//or 
+
+// function majorityElement(nums){
+//    let n = nums.length
+
+//    let map = new Map()
+
+//    for(let num of nums){
+//      map.set(num , (map.get(num) || 0) + 1)
+//    }
+
+//    for(let [key , value] of map){
+//      if(value > n/2){
+//       return key
+//      }
+//    }
+
+//    return -1
+// }
+
+// let nums = [7, 0, 0, 1, 7, 7, 2, 7, 7]
+
+// console.log(majorityElement(nums))
+
+//______________________________________________________
+
+//kadane's algorithm 
+
+// function maxSubArr(arr){
+//    let mexi = arr[0]
+
+//    for(let i = 0 ; i < arr.length ; i++){
+      
+//      let sum = 0 
+
+//      for(let j = i ; j < arr.length ; j++){
+//       sum += arr[j]
+
+//       mexi = Math.max(mexi , sum)
+//      }
+//    }
+//    return mexi
+// }
+
+// let arr = [-2, -3, -7, -2, -10, -4]
+// console.log(maxSubArr(arr))
+
+//or
+
+// function maxSubArr(arr){
+//    let mexi = arr[0]
+   
+//    let sum = 0
+
+//    for(let i = 0 ; i < arr.length ; i++){
+//        sum += arr[i]
+
+//        if(sum > mexi){
+//           mexi = sum
+//        }
+
+//        if( sum < 0){
+//         sum = 0
+//        }
+//    }
+
+//    return mexi
+// }
+
+// let arr = [-2, -3, -7, -2, -10, -4]
+// console.log(maxSubArr(arr))
+
+//________________________________________________
+
+// function BuyAndSellStock(prices){
+   
+//    let maxProfit = 0
+
+//    for(let i = 0 ; i < prices.length ; i++){
+      
+//      for(let j = i+1 ; j < prices.length ; j++){
+//         let profit = prices[j] - prices[i]
+
+//         maxProfit = Math.max(maxProfit , profit)
+//      }
+//    }
+
+//    return maxProfit
+
+// }
+
+// let prices = [7, 1, 5, 3, 6, 4]
+// console.log(BuyAndSellStock(prices))
+
+//___________________________________________________
+
+// function BuyAndSellStock(prices){
+//   let maxProfit = 0 
+
+//   let minPrice = prices[0]
+
+//   for(let price of prices){
+//     if(price < minPrice){
+//       minPrice = price
+//     }
+
+//     else{
+//       maxProfit = Math.max(maxProfit , price - minPrice)
+//     }
+//   }
+//   return maxProfit
+// }
+
+// let prices = [7, 1, 5, 3, 6, 4]
+// console.log(BuyAndSellStock(prices))
+
+//______________________________________________________
+
+//Rearrange array elements by Sign 
+
+// function RearrangeArray(A){
+//    let n = A.length
+//    let ans = new Array(n).fill(0)
+
+//    let posIndex = 0
+//    let negIndex = 1
+
+//    for(let i = 0 ; i < n ; i++){
+//        if(A[i] < 0){
+//            ans[negIndex] = A[i]
+//            negIndex += 2
+//        }else{
+//            ans[posIndex] = A[i]
+//            posIndex += 2
+//        }
+//    }
+//    return ans
+// }
+
+// let A = [1 , 2 , -4 , -5]
+// console.log(RearrangeArray(A))
+
+//_______________________________________________________
+
+// function nextPermutation(nums){
+//    let index = -1 //Matlab Abhi tak mujhe break point nahi mila.
+
+//    //find the breaking point --> break point milne ka matlab uske baad wala part strictly decreasing hota hai jaise for example 7 4 3 1 or 9 8 5 2 
+//    for(let i = nums.length - 2 ; i >= 0 ; i--){
+//       if(nums[i] < nums[i + 1]){
+//          index = i
+//          break
+//       }
+//    }
+   
+//    //agar man le breaking point nii mila then
+//     if(index === -1){
+//       nums.reverse()
+//       return
+//     }
+
+//    //find the just larger element
+//    for(let i = nums.length - 1 ; i > index ; i--){
+//        if(nums[i] > nums[index]){
+//           //swap
+//         [nums[i] , nums[index]] = [nums[index] , nums[i]]
+//         break
+//        }
+//    }
+
+//    //now reverse
+//    let left = index + 1 , right = nums.length - 1
+//    while(left < right){
+//      [nums[left] , nums[right]] = [nums[right] , nums[left]]
+//      left++
+//      right--
+//    }
+
+// }
+
+// let nums = [1, 2 , 3]
+// nextPermutation(nums)
+// console.log(nums)
+
+//________________________________________________________
+
+//leaders in an Array 
+
+// function leaders(nums){
+//   let ans = []
+
+//   for(let i = 0 ; i < nums.length ; i++){
+//     let leader = true;
+
+//     for(let j = i + 1 ; j < nums.length ; j++){
+//       if(nums[j] >= nums[i]){
+//         leader = false 
+//         break
+//       }
+//     }
+
+//     if(leader){
+//       ans.push(nums[i])
+//     }
+//   }
+//   return ans
+// }
+
+// let nums = [4, 7, 1, 0] 
+// console.log(leaders(nums))
+
+//or 
+
+// function leaders(nums){
+//   let ans = []
+
+//   if(nums.length === 0){
+//     return ans
+//   }
+
+//   let max = nums[nums.length - 1]
+//   ans.push(nums[nums.length - 1])
+
+//   //right se element to check kar thik hai 
+
+//   for(let i = nums.length - 2 ; i >= 0 ; i--){
+//      if(nums[i] > max){
+//       ans.push(nums[i])
+//       max = nums[i]
+//      }
+//   }
+//   ans.reverse()
+//   return ans
+  
+// }
+
+// let nums = [4, 7, 1, 0] 
+// console.log(leaders(nums))
+
+//________________________________________________________
+
+//longest consecutive sequence 
+
+// function longestConsecutiveSequence(nums){
+//    let n = nums.length
+//    if(n === 0) return 0
+
+//    let set = new Set(nums)
+//    let longest = 0
+
+//    for(let num of set){
+//       if(!set.has(num - 1)){
+//         let current = num
+//         let count = 1 
+
+//       while(set.has(current + 1)){
+//         current++
+//         count++
+//       }
+//       longest = Math.max(longest , count)
+//       }
+//    }
+//       return longest
+// }
+
+// let nums = [100, 4, 200, 1, 3, 2]
+// console.log(longestConsecutiveSequence(nums))
+
+//_________________________________________________________
+
+//set matrix to zero
+
+// function setZeroes(matrix){
+//    const m = matrix.length
+//    const n = matrix[0].length
+
+//    const row = new Array(m).fill(false)
+//    const col = new Array(n).fill(false)
+
+//    for(let i = 0 ; i < m ; i++){
+//     for(let j = 0 ; j < n ; j++){
+//        if(matrix[i][j] === 0){
+//         row[i] = true
+//         col[j] = true
+//        }
+//     }
+//    }
+
+//    for(let i = 0 ; i < m ; i++){
+//     for(let j = 0 ; j < n ; j++){
+//       if(row[i] || col[j]){
+//         matrix[i][j] = 0
+//       }
+//     }
+//    }
+// }
+
+// let matrix = [[1,1,1],[1,0,1],[1,1,1]]
+// setZeroes(matrix)
+// console.log(matrix)
+
+//___________________________________________________________
+
+// function rotateClockWise(matrix){
+//   let n = matrix.length
+
+//   let rotated = Array.from({length : n} , ()=>Array(n).fill(0))
+
+//    for(let i = 0 ; i < n ; i++){
+//      for(let j = 0 ; j < n ; j++){
+//       rotated[j][n - i - 1] = matrix[i][j]
+//      }
+//    }
+//    return rotated
+// }
+
+// const matrix = [
+//     [1, 2, 3],
+//     [4, 5, 6],
+//     [7, 8, 9]
+// ];
+
+// const rotated = rotateClockWise(matrix)
+// console.log(rotated)
+
+//or
+
+// function rotateClockWise(matrix){
+//   let n = matrix.length
+
+
+//    for(let i = 0 ; i < n ; i++){
+//      for(let j = i + 1 ; j < n ; j++){
+//      [matrix[i][j] , matrix[j][i]] = [matrix[j][i] , matrix[i][j]]
+//      }
+//    }
+//   for(let i = 0 ; i < n ; i++){
+//    matrix[i].reverse()
+//   }
+// }
+
+// const matrix = [
+//     [1, 2, 3],
+//     [4, 5, 6],
+//     [7, 8, 9]
+// ];
+
+// rotateClockWise(matrix)
+// console.log(matrix)
