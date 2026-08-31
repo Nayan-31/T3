@@ -1,6 +1,6 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken")
 
-export const protect = (req, res, next) => {
+const protect = (req, res, next) => {
   try {
     const token = req.cookies.token;
 
@@ -26,3 +26,5 @@ export const protect = (req, res, next) => {
     });
   }
 };
+
+module.exports = { protect };

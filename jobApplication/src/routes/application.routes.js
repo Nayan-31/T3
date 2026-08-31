@@ -1,14 +1,13 @@
-import express from "express";
+const express = require("express");
 
-import { protect } from "../middleware/auth.middleware.js";
-
-import {
+const { protect } = require("../middleware/auth.middleware.js");
+const {
   createApplication,
   getApplications,
   getApplication,
   updateApplication,
   deleteApplication,
-} from "../controllers/application.controller.js";
+} = require("../controllers/application.controller.js");
 
 const router = express.Router();
 
@@ -24,4 +23,4 @@ router.patch("/:id", updateApplication);
 
 router.delete("/:id", deleteApplication);
 
-export default router;
+module.exports = router;

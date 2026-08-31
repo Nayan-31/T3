@@ -1,6 +1,6 @@
-import userModel from "../models/user.model"
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+const userModel = require("../models/user.model.js")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 const register = async(req, res)=>{
    try {
@@ -24,7 +24,7 @@ const register = async(req, res)=>{
     
     const hashedPassword = await bcrypt.hash(password , 10)
 
-    const user = userModel.create({
+    const user = await userModel.create({
         name , 
         email : email.toLowerCase(),
         password : hashedPassword
@@ -78,7 +78,7 @@ const login = async(req, res)=>{
             })
         }
 
-        const isPasswordCorrect = bcrypt.compare = (password , user.password)
+        const isPasswordCorrect = await bcrypt.compare(password , user.password)
 
         if(!isPasswordCorrect){
             return res.status(401).json({
