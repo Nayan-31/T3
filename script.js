@@ -1466,3 +1466,30 @@
 
 //________________________________________________
 
+//merge two sorted lists
+
+// function mergeSortedLists(arr1 , arr2){
+//   let dummy = new ListNode(0)
+//   let current = dummy
+
+//   while(arr1 !== null && arr2 !== null){
+//     if(arr1.val <= arr2.val){
+//       current.next = arr1
+//       arr1 = arr1.next
+//     }else{
+//       current.next = arr2
+//       arr2 = arr2.next
+//     }
+//     current = current.next
+//   }
+//   if(arr1 != null){
+//       current.next = list1
+//   }
+//   if(arr2 !== null){
+//     current.next = list2
+//   }
+//   return dummy.next
+// }
+
+// console.log(mergeSortedLists(arr1 , arr2))
+
