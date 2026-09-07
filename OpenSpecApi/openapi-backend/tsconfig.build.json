@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json", //extends pehli config ki settings reuse karta hai.
+  "compilerOptions": {
+    "noEmit": false, //noEmit: false JavaScript output banana enable karta hai.
+    "rootDir": "src", //"src" input folder hai.
+    "outDir": "dist" //"dist" output folder hai.
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "client", "scripts"]
+}
+
+//Alag file kyun? Checking ke waqt backend aur generation scripts dono check karne hain. Production build mein sirf backend ki JavaScript chahiye.

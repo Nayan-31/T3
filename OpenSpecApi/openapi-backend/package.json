@@ -1,0 +1,36 @@
+{
+  "name": "openapi-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+ "type": "module",
+"private": true,
+"scripts": {
+  "dev": "pnpm run generate:openapi && tsx watch src/server.ts",
+  "typecheck": "tsc --noEmit",
+  "build": "pnpm run generate:openapi && tsc -p tsconfig.build.json",
+  "start": "node dist/server.js",
+  "generate:openapi": "tsx scripts/generate-openapi.ts",
+  "generate:client": "pnpm run generate:openapi && openapi-ts"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "dependencies": {
+    "@scalar/express-api-reference": "^0.10.17",
+    "axios": "^1.20.0",
+    "express": "^5.2.1",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.4.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "swagger-jsdoc": "^6.3.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
