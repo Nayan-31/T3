@@ -1493,3 +1493,106 @@
 
 // console.log(mergeSortedLists(arr1 , arr2))
 
+//________________________________________________________________
+
+//Buy and sell stock -->Brute 
+// var maxProfit = function(prices) {
+// let maxProfit=0
+// for(let i=0;i<prices.length;i++){
+//     let profit=0
+//     for(let j=i+1;j<prices.length;j++){
+//         if(prices[j]>prices[i]){
+//             profit=prices[j]-prices[i]
+//         }
+//         maxProfit=Math.max(maxProfit,profit)
+//     }
+// }
+// return maxProfit
+    
+// }
+
+//Buy and sell stock --> optimal
+// var maxProfit = function(prices) { //Agar main aaj sell karu, toh aaj se pehle sabse saste price par kab buy kar sakta tha
+// let maxProfit=0
+// let min=prices[0]
+// for(let i=0;i<prices.length;i++){
+//     let profit=0
+
+//     if(min>prices[i]){
+//         min=prices[i]
+//     }
+//   profit=prices[i]-min
+
+//   maxProfit=Math.max(maxProfit,profit)
+// }
+// return maxProfit
+    
+// };
+
+//______________________________________
+
+//Brute Maximum subarray 
+
+// var maxSubArray = function(nums) {
+// let maxSum = -Infinity;
+// for (let i = 0; i < nums.length; i++) {
+
+//     let sum = 0;
+//     for (let j = i; j < nums.length; j++) {
+//         sum += nums[j];
+//         maxSum = Math.max(maxSum, sum);
+//     }
+// }
+// return maxSum;
+// }
+
+
+//optimal
+
+// let arr= [5,4,-1,7,8]
+// let sum=0
+// let max=-Infinity
+// for(let i=0;i<arr.length;i++){
+//     sum+=arr[i]
+// max=Math.max(max,sum)
+// if(sum<0)sum=0
+
+// }
+
+// console.log(max)
+
+//______________________________________
+//Product of Array Except Self--> optimal
+
+// var productExceptSelf = function(nums) {
+//    let ans=new Array(nums.length).fill(1)
+//    let left=1
+//    for(let i=0;i<nums.length;i++){
+//     ans[i]=left
+//     left*=nums[i]
+//    }
+//    let right=1
+//     for(let i=nums.length-1;i>=0;i--){
+//     ans[i]*=right
+//     right*=nums[i]
+//    }
+//    return ans
+// };
+
+
+//Product of Array Except Self--> brute 
+// let nums=[1,2,3,4]
+// let ans=[]
+
+// for(let i=0;i<nums.length;i++){
+//     let sum=1
+//     for(let j=0;j<nums.length;j++){
+//         if(i!=j){
+//           sum=sum*nums[j]
+//         }
+        
+//     }
+// ans[i]=sum
+// }
+
+// console.log(ans)
