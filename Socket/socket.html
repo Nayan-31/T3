@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Socket.IO Cheat Sheet — Discord-Style Chat App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0D17;
+  --bg-elevated:#12142200;
+  --bg-elevated:#131526;
+  --bg-elevated-2:#191c31;
+  --bg-inset:#090a13;
+  --border:#242848;
+  --border-soft:#1a1d34;
+  --text:#EAEBF6;
+  --text-dim:#9A9DC0;
+  --text-faint:#5E6189;
+  --accent:#5865F2;
+  --accent-soft:#7983F5;
+  --accent-dim:#1B1F45;
+  --ok:#57F287;
+  --ok-dim:#123321;
+  --warn:#FEE75C;
+  --warn-dim:#3A340F;
+  --danger:#ED4245;
+  --danger-dim:#3A1518;
+  --font-display:'Sora',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',monospace;
+  --sidebar-w:280px;
+  --maxw:780px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;line-height:1.2;margin:0;color:var(--text);}
+h1{font-size:clamp(1.9rem,4vw,2.6rem);letter-spacing:-.01em;}
+h2{font-size:1.7rem;letter-spacing:-.005em;}
+h3{font-size:1.2rem;margin-top:1.9rem;}
+h4{font-size:1rem;}
+p{margin:.7rem 0;color:var(--text-dim);max-width:74ch;}
+strong{color:var(--text);font-weight:600;}
+code{font-family:var(--font-mono);}
+a{color:var(--accent-soft);}
+::selection{background:var(--accent-dim);color:var(--accent-soft);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:100;transition:width .15s ease-out;box-shadow:0 0 8px rgba(88,101,242,.6);}
+
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--bg-elevated);border-right:1px solid var(--border);overflow-y:auto;padding:20px 12px 40px;z-index:50;}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:4px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:10px;}
+.sidebar-brand svg{width:24px;height:24px;flex:none;}
+.sidebar-brand-text{font-family:var(--font-display);font-weight:600;font-size:.92rem;color:var(--text);line-height:1.25;}
+.sidebar-brand-text span{display:block;font-family:var(--font-mono);font-size:.65rem;color:var(--accent-soft);letter-spacing:.03em;}
+.toc-group-label{font-size:.65rem;color:var(--text-faint);padding:12px 10px 5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+.sidebar nav a{display:flex;gap:8px;align-items:baseline;padding:5.5px 10px;border-radius:6px;color:var(--text-dim);text-decoration:none;font-size:.81rem;border-left:2px solid transparent;transition:background .12s,color .12s;}
+.sidebar nav a:hover{background:var(--bg-elevated-2);color:var(--text);}
+.sidebar nav a.active{color:var(--accent-soft);background:var(--accent-dim);border-left-color:var(--accent);}
+.sidebar nav a .n{font-family:var(--font-mono);font-size:.68rem;color:var(--text-faint);min-width:20px;}
+.sidebar nav a.active .n{color:var(--accent-soft);}
+.sidebar-progress{margin-top:14px;padding:12px 10px;border-top:1px solid var(--border-soft);}
+.sidebar-progress-label{font-size:.65rem;color:var(--text-faint);display:flex;justify-content:space-between;margin-bottom:6px;}
+.sidebar-progress-track{height:5px;background:var(--bg-inset);border-radius:3px;overflow:hidden;}
+.sidebar-progress-fill{height:100%;background:var(--accent);width:0%;transition:width .2s;}
+.menu-toggle{display:none;}
+
+main{margin-left:var(--sidebar-w);padding:60px 46px 120px;}
+.content{max-width:var(--maxw);margin:0 auto;}
+.hero{max-width:840px;margin:0 auto 8px;}
+.eyebrow{font-family:var(--font-mono);font-size:.76rem;color:var(--accent-soft);margin-bottom:12px;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.tech-pill{font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);background:var(--bg-elevated);border:1px solid var(--border);border-radius:20px;padding:4px 11px;}
+
+section.chapter{padding-top:50px;margin-top:50px;border-top:1px solid var(--border-soft);scroll-margin-top:26px;}
+section.chapter:first-of-type{border-top:none;}
+.chapter-kicker{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.chapter-num{font-family:var(--font-mono);color:var(--text-faint);font-size:.82rem;}
+.chapter-sub{color:var(--text-faint);font-size:.92rem;margin-top:6px;}
+.badge{display:inline-flex;align-items:center;font-family:var(--font-mono);font-weight:600;background:var(--accent-dim);color:var(--accent-soft);border:1px solid #2c3270;border-radius:6px;padding:3px 10px;font-size:.78rem;}
+.badge.advanced{background:var(--warn-dim);color:var(--warn);border-color:#5a4e18;}
+
+.card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:16px 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:760px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.box{display:flex;gap:11px;border-radius:10px;padding:13px 15px;margin:16px 0;border:1px solid;}
+.box .ic{flex:none;font-size:1.05rem;}
+.box p{margin:0;font-size:.9rem;}
+.box.remember{background:var(--accent-dim);border-color:#2c3270;}
+.box.remember .ic{color:var(--accent-soft);}
+.box.remember p{color:#C7CBF7;}
+.box.mistake{background:var(--danger-dim);border-color:#5c2224;}
+.box.mistake .ic{color:var(--danger);}
+.box.mistake p{color:#F5C3C4;}
+.box.discord{background:var(--ok-dim);border-color:#1e5c37;}
+.box.discord .ic{color:var(--ok);}
+.box.discord p{color:#BCEFCB;}
+.box.warn{background:var(--warn-dim);border-color:#5a4e18;}
+.box.warn .ic{color:var(--warn);}
+.box.warn p{color:#F1E5A8;}
+.box-title{font-family:var(--font-mono);font-weight:600;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;display:block;margin-bottom:3px;}
+
+.code-block{background:var(--bg-inset);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:14px 0;}
+.code-block-head{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:var(--bg-elevated-2);border-bottom:1px solid var(--border);}
+.code-block-head .lbl{font-family:var(--font-mono);font-size:.7rem;color:var(--text-faint);display:flex;align-items:center;gap:7px;}
+.dot-row{display:flex;gap:5px;}
+.dot-row span{width:7px;height:7px;border-radius:50%;background:var(--border);}
+.copy-btn{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);background:var(--bg-inset);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;}
+.copy-btn:hover{color:var(--accent-soft);border-color:var(--accent-soft);}
+.code-block pre{margin:0;padding:14px;overflow-x:auto;}
+.code-block code{font-family:var(--font-mono);font-size:.82rem;line-height:1.6;color:#C9CCE8;white-space:pre;}
+.tok-comment{color:var(--text-faint);font-style:italic;}
+.tok-string{color:#8FD9A8;}
+.tok-number{color:#E8B36A;}
+.tok-op{color:var(--accent-soft);}
+.tok-keyword{color:#7FB4E8;}
+
+.ascii{background:var(--bg-inset);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:16px 0;overflow-x:auto;}
+.ascii pre{margin:0;font-family:var(--font-mono);font-size:.8rem;line-height:1.55;color:var(--text-dim);white-space:pre;}
+.ascii .hl{color:var(--accent-soft);font-weight:600;}
+
+table.data-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.85rem;}
+table.data-table th{text-align:left;color:var(--text-faint);font-family:var(--font-mono);font-weight:600;font-size:.7rem;padding:8px 11px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.02em;}
+table.data-table td{padding:10px 11px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;}
+table.data-table td code{font-size:.78rem;color:#C9CCE8;}
+table.data-table tr:hover td{background:var(--bg-elevated);}
+
+.method-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:14px 0;}
+.method-card .m-sig{font-family:var(--font-mono);color:var(--accent-soft);font-size:.92rem;font-weight:600;margin-bottom:6px;}
+.method-card .m-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--text-faint);margin:8px 0;font-family:var(--font-mono);}
+.method-card .m-meta b{color:var(--text-dim);font-weight:600;}
+
+details.collapse{background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;margin:14px 0;overflow:hidden;}
+details.collapse summary{cursor:pointer;padding:11px 15px;font-weight:600;font-size:.88rem;color:var(--text);list-style:none;display:flex;align-items:center;gap:8px;}
+details.collapse summary::-webkit-details-marker{display:none;}
+details.collapse summary:before{content:"▸";color:var(--accent-soft);transition:transform .15s;}
+details.collapse[open] summary:before{transform:rotate(90deg);}
+details.collapse .collapse-body{padding:0 15px 15px;color:var(--text-dim);font-size:.9rem;}
+
+ul.tight{margin:10px 0;padding-left:20px;}
+ul.tight li{color:var(--text-dim);margin:5px 0;font-size:.92rem;}
+ul.check-list{list-style:none;margin:12px 0;padding:0;}
+ul.check-list li{padding-left:24px;position:relative;color:var(--text-dim);margin:7px 0;font-size:.9rem;}
+ul.check-list li:before{content:"☐";position:absolute;left:0;color:var(--accent-soft);}
+ul.x-list{list-style:none;margin:12px 0;padding:0;}
+ul.x-list li{padding-left:24px;position:relative;color:var(--text-dim);margin:7px 0;font-size:.9rem;}
+ul.x-list li:before{content:"✕";position:absolute;left:0;color:var(--danger);font-size:.78rem;top:2px;}
+
+.step-list{counter-reset:step;list-style:none;margin:16px 0;padding:0;}
+.step-list li{counter-increment:step;position:relative;padding:10px 0 10px 38px;border-bottom:1px solid var(--border-soft);}
+.step-list li:last-child{border-bottom:none;}
+.step-list li:before{content:counter(step);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:50%;background:var(--accent-dim);color:var(--accent-soft);font-family:var(--font-mono);font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.step-list .step-title{font-weight:600;color:var(--text);font-size:.92rem;}
+.step-list .step-desc{font-size:.86rem;color:var(--text-dim);margin-top:2px;}
+
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;}
+@media(max-width:700px){.qr-grid{grid-template-columns:1fr;}}
+.qr-item{background:var(--bg-inset);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.qr-item .qr-label{font-family:var(--font-mono);font-size:.7rem;color:var(--text-faint);margin-bottom:4px;}
+.qr-item code{color:var(--accent-soft);font-size:.86rem;}
+
+.page-footer{max-width:var(--maxw);margin:70px auto 0;padding-top:22px;border-top:1px solid var(--border-soft);color:var(--text-faint);font-size:.83rem;}
+
+@media(max-width:900px){
+  :root{--sidebar-w:0px;}
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease;width:284px;box-shadow:0 0 40px rgba(0,0,0,.5);}
+  .sidebar.open{transform:translateX(0);}
+  main{margin-left:0;padding:58px 18px 100px;}
+  .menu-toggle{display:flex;position:fixed;top:14px;left:14px;z-index:60;align-items:center;gap:8px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-mono);font-size:.76rem;cursor:pointer;}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:45;}
+  .sidebar-backdrop.show{display:block;}
+}
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<button class="menu-toggle" id="menuToggle">☰ Contents</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#5865F2" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" fill="#5865F2"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="#5865F2" stroke-width="1.6"/></svg>
+    <div class="sidebar-brand-text">Socket.IO Notes<span>Discord-clone reference</span></div>
+  </div>
+  <nav id="tocNav">
+    <div class="toc-group-label">Foundations</div>
+    <a href="#s1"><span class="n">01</span>Fundamentals</a>
+    <a href="#s2"><span class="n">02</span>Basic Server Setup</a>
+    <a href="#s3"><span class="n">03</span>io &amp; socket Objects</a>
+    <a href="#s4"><span class="n">04</span>Events</a>
+    <div class="toc-group-label">Data &amp; Rooms</div>
+    <a href="#s5"><span class="n">05</span>Event Data</a>
+    <a href="#s6"><span class="n">06</span>Rooms</a>
+    <a href="#s7"><span class="n">07</span>Broadcasting</a>
+    <div class="toc-group-label">Discord Architecture</div>
+    <a href="#s8"><span class="n">08</span>Message Flow</a>
+    <a href="#s9"><span class="n">09</span>Event Naming</a>
+    <a href="#s10"><span class="n">10</span>Typing Indicator</a>
+    <a href="#s11"><span class="n">11</span>Online/Offline</a>
+    <div class="toc-group-label">Auth &amp; Data Layer</div>
+    <a href="#s12"><span class="n">12</span>Authentication</a>
+    <a href="#s13"><span class="n">13</span>Authorization</a>
+    <a href="#s14"><span class="n">14</span>Socket.IO + MongoDB</a>
+    <a href="#s15"><span class="n">15</span>Socket.IO + Controllers</a>
+    <div class="toc-group-label">Lifecycle &amp; Client</div>
+    <a href="#s16"><span class="n">16</span>Lifecycle</a>
+    <a href="#s17"><span class="n">17</span>disconnecting vs disconnect</a>
+    <a href="#s18"><span class="n">18</span>Client-Side Setup</a>
+    <a href="#s19"><span class="n">19</span>Complete React Example</a>
+    <div class="toc-group-label">Discord Patterns</div>
+    <a href="#s20"><span class="n">20</span>Room Management</a>
+    <a href="#s21"><span class="n">21</span>Private Messages</a>
+    <a href="#s22"><span class="n">22</span>Acknowledgements</a>
+    <a href="#s23"><span class="n">23</span>Error Handling</a>
+    <a href="#s24"><span class="n">24</span>Middleware</a>
+    <div class="toc-group-label">Advanced</div>
+    <a href="#s25"><span class="n">25</span>Namespaces</a>
+    <a href="#s26"><span class="n">26</span>Adapters</a>
+    <a href="#s27"><span class="n">27</span>Redis + Socket.IO</a>
+    <a href="#s28"><span class="n">28</span>Scaling</a>
+    <div class="toc-group-label">Production</div>
+    <a href="#s29"><span class="n">29</span>Security Checklist</a>
+    <a href="#s30"><span class="n">30</span>Common Mistakes</a>
+    <a href="#s31"><span class="n">31</span>Debugging</a>
+    <a href="#s32"><span class="n">32</span>Postman Testing</a>
+    <div class="toc-group-label">Reference</div>
+    <a href="#s33"><span class="n">33</span>Full Architecture</a>
+    <a href="#s34"><span class="n">34</span>Quick Reference</a>
+    <a href="#s35"><span class="n">35</span>REST vs Socket.IO</a>
+    <a href="#s36"><span class="n">36</span>Learning Order</a>
+  </nav>
+  <div class="sidebar-progress">
+    <div class="sidebar-progress-label"><span>Progress</span><span id="progressPct">0%</span></div>
+    <div class="sidebar-progress-track"><div class="sidebar-progress-fill" id="progressFill"></div></div>
+  </div>
+</aside>
+
+<main>
+<div class="content">
+
+  <div class="hero">
+    <div class="eyebrow">// implementation cheat sheet · node + express + socket.io + react + mongodb</div>
+    <h1>Socket.IO Cheat Sheet &amp; Implementation Notes</h1>
+    <p style="font-size:1.02rem;margin-top:12px;">A practical reference for building the real-time layer of a Discord-style chat app. Keep this open while you code — every method is shown with its syntax, who receives the event, and a Discord-specific example.</p>
+    <div class="hero-tags">
+      <span class="tech-pill">Node.js</span><span class="tech-pill">Express.js</span><span class="tech-pill">Socket.IO 4.x</span><span class="tech-pill">React</span><span class="tech-pill">MongoDB / Mongoose</span><span class="tech-pill">JWT</span>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 1 ============ -->
+  <section class="chapter" id="s1">
+    <div class="chapter-kicker"><span class="chapter-num">01</span><span class="badge">fundamentals</span></div>
+    <h2>Socket.IO Fundamentals</h2>
+    <p class="chapter-sub">Why this exists, before any syntax.</p>
+
+    <h3>The problem it solves</h3>
+    <p>HTTP is request → response. The client asks, the server answers, and the connection is done. That's fine for "load my messages," but useless for "notify me the instant someone <em>else</em> sends a message." A Discord-style app needs the server to push data to clients <em>without being asked</em> — that's the problem Socket.IO solves.</p>
+
+    <h3>Socket.IO vs HTTP/REST</h3>
+    <div class="grid-2">
+      <div class="card"><h4 style="color:var(--accent-soft);">HTTP / REST</h4><p style="margin:0;font-size:.9rem;">Request → response, then the connection closes. The server can never speak first. Great for CRUD: create a server, fetch messages, update a profile.</p></div>
+      <div class="card"><h4 style="color:var(--accent-soft);">Socket.IO</h4><p style="margin:0;font-size:.9rem;">A connection that stays open. Either side can send data at any time, with no new connection needed. Great for: new message arrived, someone is typing, a user went online.</p></div>
+    </div>
+
+    <h3>Socket.IO vs raw WebSocket</h3>
+    <p>This distinction trips up almost everyone at first — <strong>Socket.IO is not WebSocket</strong>, it's a library <em>built on top of</em> WebSocket (with automatic fallbacks and extra features).</p>
+    <table class="data-table">
+      <thead><tr><th></th><th>Raw WebSocket</th><th>Socket.IO</th></tr></thead>
+      <tbody>
+        <tr><td>What it is</td><td>A low-level browser/server protocol (<code>ws://</code>)</td><td>A library that uses WebSocket under the hood, plus a protocol of its own on top</td></tr>
+        <tr><td>Fallback if WS fails</td><td>None — connection just fails</td><td>Automatically falls back to HTTP long-polling</td></tr>
+        <tr><td>Reconnection</td><td>You implement it yourself</td><td>Built in, automatic</td></tr>
+        <tr><td>Rooms / broadcasting</td><td>You implement it yourself</td><td>Built in (<code>socket.join</code>, <code>io.to()</code>)</td></tr>
+        <tr><td>Event system</td><td>One generic <code>onmessage</code> event</td><td>Named custom events — <code>socket.on("message:new", ...)</code></td></tr>
+        <tr><td>Acknowledgements</td><td>You implement it yourself</td><td>Built in, callback-based</td></tr>
+        <tr><td>Client/server compatibility</td><td>Any WS client can talk to any WS server</td><td>A Socket.IO <strong>client</strong> can only talk to a Socket.IO <strong>server</strong> — its handshake and packet format aren't plain WebSocket</td></tr>
+      </tbody>
+    </table>
+    <div class="box mistake"><div class="ic">✕</div><p><span class="box-title">Common mistake</span>Trying to connect a raw <code>WebSocket</code> browser client, or a tool like <code>wscat</code>, to a Socket.IO server and getting confused when it doesn't work. Socket.IO servers need a Socket.IO client (or Postman's dedicated Socket.IO request type — see section 32).</p></div>
+
+    <h3>Core vocabulary</h3>
+    <ul class="tight">
+      <li><strong>Persistent connection</strong> — the client and server stay connected instead of reconnecting per request.</li>
+      <li><strong>Full-duplex</strong> — both sides can send data at the same time, independently, over that one connection.</li>
+      <li><strong><code>io</code></strong> — the Socket.IO server instance. Represents your <em>entire</em> real-time server, and every connected client.</li>
+      <li><strong><code>socket</code></strong> — one single connected client. Every user in your Discord clone who's online has exactly one (or more) <code>socket</code>.</li>
+      <li><strong>Connection lifecycle</strong> — the stages a client goes through: connecting → connected → (using it) → disconnecting → disconnected.</li>
+      <li><strong>Event-driven</strong> — nothing happens automatically; you react to named events (<code>"connection"</code>, <code>"message:new"</code>, ...) with handler functions.</li>
+    </ul>
+
+    <h3>The mental model</h3>
+    <div class="ascii"><pre>  React Client
+       │  <span class="hl">socket = io(URL, { auth: { token } })</span>
+       ▼
+  Socket connection  ── one persistent, authenticated pipe
+       ▼
+  Socket.IO server (<span class="hl">io</span>)
+       ▼
+  Events  ── <span class="hl">"message:send"</span>, <span class="hl">"channel:join"</span>, <span class="hl">"user:typing"</span> ...
+       ▼
+  Rooms / namespaces  ── <span class="hl">channel:123</span>, <span class="hl">user:45</span> ...
+       ▼
+  Other connected clients  ── everyone else in that room, notified instantly</pre></div>
+
+    <h3>When to use REST vs Socket.IO vs both</h3>
+    <table class="data-table">
+      <thead><tr><th>Use</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td>REST only</td><td>Anything that isn't time-sensitive: login, creating a server, editing a profile, paginated history.</td></tr>
+        <tr><td>Socket.IO only</td><td>Ephemeral, non-persisted signals: typing indicators, presence pings.</td></tr>
+        <tr><td>Both together</td><td>The most common real case — REST <strong>persists</strong> the data, Socket.IO <strong>announces</strong> that it happened. This is exactly how message sending works — see section 8.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box discord"><div class="ic">◆</div><p><span class="box-title">Discord example</span>When you send a message in Discord, it's saved to a database (REST/HTTP call) <em>and</em> every other open client in that channel sees it appear instantly (Socket.IO event) — without refreshing. Two different jobs, two different tools, one feature.</p></div>
+  </section>
+
+  <!-- ============ SECTION 2 ============ -->
+  <section class="chapter" id="s2">
+    <div class="chapter-kicker"><span class="chapter-num">02</span><span class="badge">setup</span></div>
+    <h2>Basic Socket.IO Server Setup</h2>
+    <p class="chapter-sub">Production-friendly, from the very first line.</p>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>server.js</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">import http from "http";
+import { Server } from "socket.io";
+import app from "./app.js";
+import { initializeSocket } from "./socket/socket.js";
+
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL, // e.g. "http://localhost:5173" in dev
+    credentials: true
+  }
+});
+
+initializeSocket(io);
+
+httpServer.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
+});</code></pre>
+    </div>
+
+    <h3>Why attach Socket.IO to the HTTP server, not app.listen()</h3>
+    <p><code>app.listen()</code> is really just shorthand that creates an HTTP server for you internally and starts it — but it doesn't hand you a reference to that server. Socket.IO needs a real, referenceable HTTP server object to attach itself to, because it upgrades HTTP connections into persistent ones. So instead of hiding the server inside <code>app.listen()</code>, you create it explicitly with <code>http.createServer(app)</code>, and pass <em>that</em> to both <code>Server(httpServer)</code> and <code>httpServer.listen()</code>. Express still handles all your normal REST routes exactly as before — Socket.IO just rides on the same server, on the same port.</p>
+
+    <h3>CORS, credentials &amp; origins</h3>
+    <table class="data-table">
+      <thead><tr><th>Option</th><th>What it's for</th></tr></thead>
+      <tbody>
+        <tr><td><code>origin</code></td><td>Which frontend URLs are allowed to open a socket connection. In dev this is usually your Vite/CRA dev server, e.g. <code>http://localhost:5173</code>.</td></tr>
+        <tr><td><code>credentials: true</code></td><td>Required if you send cookies or an <code>Authorization</code> header alongside the socket handshake.</td></tr>
+      </tbody>
+    </table>
+    <div class="box warn"><div class="ic">▲</div><p><span class="box-title">Production note</span>Never use <code>origin: "*"</code> with <code>credentials: true</code> — browsers reject that combination, and even where they don't, it defeats the purpose of CORS. Set <code>origin</code> to your real deployed frontend URL in production, read from an environment variable.</p></div>
+
+    <h3>Recommended folder structure</h3>
+    <div class="ascii"><pre>src/
+├── app.js              <span class="hl"># Express app — routes, middleware, NOT listening</span>
+├── server.js            <span class="hl"># creates httpServer, attaches io, starts listening</span>
+├── socket/
+│   └── socket.js         <span class="hl"># initializeSocket(), getIO(), all socket event handlers</span>
+├── controllers/          <span class="hl"># REST controllers — can call getIO() to emit</span>
+├── models/                <span class="hl"># Mongoose schemas</span>
+├── routes/                <span class="hl"># Express routers</span>
+└── middleware/            <span class="hl"># auth, error handling, validation</span></pre></div>
+  </section>
+
+  <!-- ============ SECTION 3 ============ -->
+  <section class="chapter" id="s3">
+    <div class="chapter-kicker"><span class="chapter-num">03</span><span class="badge">core objects</span></div>
+    <h2>Important Socket.IO Objects</h2>
+    <p class="chapter-sub"><code>io</code> and <code>socket</code> — everything else is built from these two.</p>
+
+    <div class="grid-2">
+      <div class="card"><h4 style="color:var(--accent-soft);"><code>io</code></h4><p style="margin:0;font-size:.9rem;">The entire Socket.IO server. Represents <strong>every</strong> connected client at once, plus every room. You get it once, at startup.</p></div>
+      <div class="card"><h4 style="color:var(--accent-soft);"><code>socket</code></h4><p style="margin:0;font-size:.9rem;">One single connected client. You get a fresh <code>socket</code> object inside the <code>"connection"</code> handler, one per connected user (or per device/tab).</p></div>
+    </div>
+
+    <h3>Emitting — who receives what</h3>
+    <table class="data-table">
+      <thead><tr><th>Method</th><th>Receiver</th><th>Includes sender?</th></tr></thead>
+      <tbody>
+        <tr><td><code>socket.emit()</code></td><td>Only this one connected client</td><td>—</td></tr>
+        <tr><td><code>io.emit()</code></td><td>Every connected client on the server</td><td>Yes</td></tr>
+        <tr><td><code>socket.broadcast.emit()</code></td><td>Every connected client <em>except</em> this one</td><td>No</td></tr>
+        <tr><td><code>io.to(room).emit()</code></td><td>Everyone in <code>room</code></td><td>Yes</td></tr>
+        <tr><td><code>socket.to(room).emit()</code></td><td>Everyone in <code>room</code> <em>except</em> this socket</td><td>No</td></tr>
+      </tbody>
+    </table>
+
+    <div class="method-card">
+      <div class="m-sig">socket.emit(event, data)</div>
+      <div class="m-meta"><span><b>Receiver:</b> this socket only</span></div>
+      <p style="margin:6px 0 0;font-size:.88rem;">Send data back to the one client that triggered the handler — e.g. confirming their own message was saved.</p>
+    </div>
+    <div class="method-card">
+      <div class="m-sig">io.emit(event, data)</div>
+      <div class="m-meta"><span><b>Receiver:</b> everyone, server-wide</span></div>
+      <p style="margin:6px 0 0;font-size:.88rem;">Rarely what you want in a multi-channel/multi-server app — it ignores rooms entirely. Reserve it for truly global events, like a server-wide maintenance notice.</p>
+    </div>
+    <div class="method-card">
+      <div class="m-sig">socket.broadcast.emit(event, data)</div>
+      <div class="m-meta"><span><b>Receiver:</b> everyone except this socket, server-wide</span></div>
+      <p style="margin:6px 0 0;font-size:.88rem;">Same global-scope caveat as <code>io.emit()</code> — use the room-scoped versions below for anything channel-specific.</p>
+    </div>
+    <div class="method-card">
+      <div class="m-sig">io.to(room).emit(event, data)</div>
+      <div class="m-meta"><span><b>Receiver:</b> everyone in <code>room</code>, including sender</span></div>
+      <p style="margin:6px 0 0;font-size:.88rem;">The workhorse of a Discord clone: <code>io.to(`channel:${channelId}`).emit("message:new", message)</code>.</p>
+    </div>
+    <div class="method-card">
+      <div class="m-sig">socket.to(room).emit(event, data)</div>
+      <div class="m-meta"><span><b>Receiver:</b> everyone in <code>room</code> except sender</span></div>
+      <p style="margin:6px 0 0;font-size:.88rem;">Used for things the sender already knows about themselves — like their own typing indicator (see section 10).</p>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4 ============ -->
+  <section class="chapter" id="s4">
+    <div class="chapter-kicker"><span class="chapter-num">04</span><span class="badge">events</span></div>
+    <h2>Events</h2>
+    <p class="chapter-sub">Socket.IO is entirely event-driven — you never poll, you only listen and emit.</p>
+
+    <div class="grid-2">
+      <div class="card"><div class="m-sig" style="font-family:var(--font-mono);color:var(--accent-soft);">socket.on(event, cb)</div><p style="margin:6px 0 0;font-size:.88rem;">Registers a listener — run <code>cb</code> every time <code>event</code> arrives.</p></div>
+      <div class="card"><div class="m-sig" style="font-family:var(--font-mono);color:var(--accent-soft);">socket.emit(event, data)</div><p style="margin:6px 0 0;font-size:.88rem;">Sends <code>event</code> with a payload to whoever's listening on the other side.</p></div>
+      <div class="card"><div class="m-sig" style="font-family:var(--font-mono);color:var(--accent-soft);">socket.once(event, cb)</div><p style="margin:6px 0 0;font-size:.88rem;">Same as <code>.on()</code>, but auto-removes itself after firing once. Handy for one-time handshake events.</p></div>
+      <div class="card"><div class="m-sig" style="font-family:var(--font-mono);color:var(--accent-soft);">socket.off(event, cb)</div><p style="margin:6px 0 0;font-size:.88rem;">Removes a listener. Critical in React cleanup — see section 18.</p></div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>example</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">// server
+socket.on("message:send", (data) => {
+  console.log(data);
+});
+
+// somewhere else — sending
+socket.emit("message:send", { channelId, content });</code></pre>
+    </div>
+
+    <h3>Built-in events vs custom application events</h3>
+    <p>Socket.IO ships with a handful of events it fires automatically — you never <code>emit</code> these yourself, you only <code>.on()</code> them. Everything else — <code>"message:new"</code>, <code>"user:typing"</code> — is something <strong>you</strong> invent and name.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Event</th><th>Fires on</th><th>Fired automatically by</th></tr></thead>
+      <tbody>
+        <tr><td><code>"connection"</code></td><td>Server (<code>io</code>)</td><td>Socket.IO, when a new client connects</td></tr>
+        <tr><td><code>"connect"</code></td><td>Client</td><td>Socket.IO, once the client's socket is connected</td></tr>
+        <tr><td><code>"disconnect"</code></td><td>Server &amp; client, per socket</td><td>Socket.IO, once a socket has fully disconnected</td></tr>
+        <tr><td><code>"disconnecting"</code></td><td>Server, per socket</td><td>Socket.IO, just <em>before</em> the socket leaves its rooms — see section 17</td></tr>
+        <tr><td><code>"connect_error"</code></td><td>Client</td><td>Socket.IO, when the connection attempt itself fails</td></tr>
+        <tr><td><code>"newListener"</code> / <code>"removeListener"</code></td><td>Both (Node <code>EventEmitter</code>)</td><td>Node.js itself — fires whenever <em>any</em> listener is added/removed. Rarely used directly.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>socket/socket.js</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id); // built-in, server-side
+
+  socket.on("channel:join", (channelId) => { /* custom event */ });
+  socket.on("message:send", (data) => { /* custom event */ });
+
+  socket.on("disconnect", () => { // built-in
+    console.log("Socket disconnected:", socket.id);
+  });
+});</code></pre>
+    </div>
+
+    <h3>Custom event vocabulary for the Discord clone</h3>
+    <ul class="tight">
+      <li><code>"channel:join"</code> / <code>"channel:leave"</code> — a client asking to enter/exit a channel's room</li>
+      <li><code>"message:new"</code> / <code>"message:send"</code> — a message was persisted / a client wants to send one</li>
+      <li><code>"user:typing"</code> / <code>"user:online"</code> — presence and activity signals</li>
+    </ul>
+  </section>
+
+  <!-- ============ SECTION 5 ============ -->
+  <section class="chapter" id="s5">
+    <div class="chapter-kicker"><span class="chapter-num">05</span><span class="badge">event data</span></div>
+    <h2>Event Data</h2>
+    <p class="chapter-sub">What you can send along with an event, and how to get a response back.</p>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>simple payloads</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">socket.emit("message:send", "hello");            // a primitive
+socket.emit("message:send", { channelId, content }); // an object — most common
+socket.emit("event", data1, data2);               // multiple arguments</code></pre>
+    </div>
+
+    <h3>Acknowledgement callbacks</h3>
+    <p>Sometimes you need to know the server actually handled your event — not just fired it into the void. An acknowledgement is a callback function passed as the <em>last</em> argument; the server calls it directly, like a mini request/response inside your socket connection.</p>
+
+    <div class="grid-2">
+      <div class="code-block">
+        <div class="code-block-head"><span class="lbl">client</span></div>
+        <pre><code data-lang="js">socket.emit("message:send", data, (response) => {
+  console.log(response);
+  // { success: true, messageId: "..." }
+});</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-block-head"><span class="lbl">server</span></div>
+        <pre><code data-lang="js">socket.on("message:send", (data, callback) => {
+  // ...save message...
+  callback({ success: true, messageId: msg._id });
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="box remember"><div class="ic">◆</div><p><span class="box-title">When are acknowledgements useful?</span>Any time the client needs to know "did that actually work?" right away — confirming a message send, confirming a room join succeeded, or getting an error back synchronously instead of guessing. For pure notifications nobody needs to confirm (like a typing indicator), skip the callback — it's unnecessary overhead.</p></div>
+  </section>
+
+  <!-- ============ SECTION 6 ============ -->
+  <section class="chapter" id="s6">
+    <div class="chapter-kicker"><span class="chapter-num">06</span><span class="badge">rooms</span></div>
+    <h2>Rooms</h2>
+    <p class="chapter-sub">Socket.IO's way of grouping connections — the backbone of channel-based chat.</p>
+
+    <div class="box remember"><div class="ic">◆</div><p><span class="box-title">What a room actually is</span>A room is a <strong>Socket.IO-only, server-side, in-memory grouping label</strong>. It is <em>not</em> a MongoDB collection, not a database channel document, and not a physical network connection — it's just a string that Socket.IO uses internally to know which sockets should receive a given broadcast.</p></div>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>joining / leaving</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">socket.join(`channel:${channelId}`);   // add this socket to a room
+socket.leave(`channel:${channelId}`);  // remove it from a room</code></pre>
+    </div>
+
+    <h3>Template literals, quickly</h3>
+    <p>The backtick string <code>`channel:${channelId}`</code> just substitutes the variable into the string. If <code>channelId = "123"</code>, the result is the plain string <code>"channel:123"</code> — that's the actual room name Socket.IO stores internally.</p>
+
+    <h3>From a MongoDB document to a Socket.IO room</h3>
+    <div class="ascii"><pre>MongoDB Channel document  { _id: "123", name: "general" }
+        │
+        ▼
+React receives channel._id  from a REST fetch
+        │
+        ▼
+React emits  <span class="hl">socket.emit("channel:join", channelId)</span>
+        │
+        ▼
+Socket.IO server handler receives channelId
+        │
+        ▼
+<span class="hl">socket.join(`channel:${channelId}`)</span>
+        │
+        ▼
+Socket.IO room  <span class="hl">"channel:123"</span>  ── exists only in server memory</pre></div>
+
+    <h3>Working with rooms</h3>
+    <table class="data-table">
+      <thead><tr><th>Task</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Join a room</td><td><code>socket.join(room)</code></td></tr>
+        <tr><td>Leave a room</td><td><code>socket.leave(room)</code></td></tr>
+        <tr><td>Check which rooms a socket is in</td><td><code>socket.rooms</code> — a <code>Set</code>, always includes the socket's own id</td></tr>
+        <tr><td>Join multiple rooms</td><td>Call <code>socket.join()</code> multiple times — a socket can be in as many rooms as needed (e.g. every channel of every server the user has open)</td></tr>
+        <tr><td>Automatic cleanup</td><td>When a socket disconnects, Socket.IO automatically removes it from every room it was in — you don't call <code>.leave()</code> manually on disconnect</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box discord"><div class="ic">◆</div><p><span class="box-title">Discord example</span>Every open channel a user has visited in a session becomes a room their socket has joined. Switching channels in the UI is really: <code>socket.emit("channel:leave", oldChannelId)</code> then <code>socket.emit("channel:join", newChannelId)</code>.</p></div>
+  </section>
+
+  <!-- ============ SECTION 7 ============ -->
+  <section class="chapter" id="s7">
+    <div class="chapter-kicker"><span class="chapter-num">07</span><span class="badge">broadcasting</span></div>
+    <h2>Broadcasting</h2>
+    <p class="chapter-sub">Six ways to send an event — pick the narrowest one that does the job.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Method</th><th>Receiver</th><th>Includes sender?</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td><code>socket.emit()</code></td><td>Current socket only</td><td>—</td><td>Confirming an action back to the one client that triggered it</td></tr>
+        <tr><td><code>io.emit()</code></td><td>Everyone on the server</td><td>Yes</td><td>Truly global announcements (rare)</td></tr>
+        <tr><td><code>socket.broadcast.emit()</code></td><td>Everyone except sender</td><td>No</td><td>Global "someone did X" not scoped to a room (rare)</td></tr>
+        <tr><td><code>io.to(room).emit()</code></td><td>Everyone in the room</td><td>Yes</td><td>New chat message — sender should see it too, via server confirmation</td></tr>
+        <tr><td><code>socket.to(room).emit()</code></td><td>Everyone in the room except sender</td><td>No</td><td>Typing indicators — sender already knows they're typing</td></tr>
+        <tr><td><code>io.to(room1).to(room2).emit()</code></td><td>Everyone in either room (chained)</td><td>Yes</td><td>Notifying two related rooms at once — e.g. a channel room and a server-wide activity room</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2">
+      <div class="code-block"><div class="code-block-head"><span class="lbl">1. current socket</span></div><pre><code data-lang="js">socket.emit("message:sent-ack", { ok: true });</code></pre></div>
+      <div class="code-block"><div class="code-block-head"><span class="lbl">2. everyone</span></div><pre><code data-lang="js">io.emit("server:maintenance", { in: "5 minutes" });</code></pre></div>
+      <div class="code-block"><div class="code-block-head"><span class="lbl">3. everyone but sender</span></div><pre><code data-lang="js">socket.broadcast.emit("user:online", { userId });</code></pre></div>
+      <div class="code-block"><div class="code-block-head"><span class="lbl">4. a room</span></div><pre><code data-lang="js">io.to(`channel:${channelId}`).emit("message:new", message);</code></pre></div>
+      <div class="code-block"><div class="code-block-head"><span class="lbl">5. room, excluding sender</span></div><pre><code data-lang="js">socket.to(`channel:${channelId}`).emit("user:typing", { userId });</code></pre></div>
+      <div class="code-block"><div class="code-block-head"><span class="lbl">6. multiple rooms</span></div><pre><code data-lang="js">io.to(`channel:${channelId}`).to(`server:${serverId}`).emit("event", data);</code></pre></div>
+    </div>
+
+    <div class="box mistake"><div class="ic">✕</div><p><span class="box-title">Common mistake</span>Using <code>io.emit()</code> for a channel message. Every connected client — including people who aren't even in that server — gets the event, and your frontend has to filter it out client-side instead of never receiving it at all. Always scope chat events to a room with <code>io.to(room).emit()</code>.</p></div>
+  </section>
+
+  <!-- ============ SECTION 8 ============ -->
+  <section class="chapter" id="s8">
+    <div class="chapter-kicker"><span class="chapter-num">08</span><span class="badge">architecture</span></div>
+    <h2>Discord Chat Message Flow</h2>
+    <p class="chapter-sub">The single most important architectural decision in this whole document.</p>
+
+    <div class="ascii"><pre>React
+  │  <span class="hl">POST /messages { channelId, content }</span>
+  ▼
+Express controller
+  │
+  ├── Authentication  ── verify JWT, identify the user
+  ├── Authorization    ── is this user a member of this channel?
+  ▼
+MongoDB  ── message saved, gets a real _id + createdAt
+  ▼
+Socket.IO
+  │  <span class="hl">io.to(`channel:${channelId}`).emit("message:new", message)</span>
+  ▼
+All sockets currently joined to that channel's room receive it instantly</pre></div>
+
+    <h3>Why REST persists, and Socket.IO only delivers</h3>
+    <p>REST/Express is good at exactly one thing here that Socket.IO isn't: it gives you a clean, synchronous request/response cycle to validate, authorize, and write to MongoDB, and to return a clear success/error status. Socket.IO is good at the thing REST isn't: pushing that result to everyone else <em>without</em> them having to ask. Splitting the responsibility this way keeps each layer doing what it's actually good at.</p>
+
+    <div class="box mistake"><div class="ic">✕</div><p><span class="box-title">Why not save the message twice?</span>If both your REST controller <em>and</em> your <code>"message:send"</code> socket handler write to MongoDB independently, you'll get duplicate messages, race conditions, and two different code paths that can drift out of sync (different validation, different authorization checks). <strong>Pick one path to write to the database</strong> — REST is the conventional choice — and let Socket.IO only be the messenger.</p></div>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>controllers/messageController.js</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">import Message from "../models/Message.js";
+import { getIO } from "../socket/socket.js";
+
+export const sendMessage = async (req, res) => {
+  const { channelId, content } = req.body;
+  const userId = req.user._id; // set by auth middleware
+
+  // authorization check happens before writing — see section 13
+  const message = await Message.create({
+    channel: channelId,
+    author: userId,
+    content
+  });
+
+  const populated = await message.populate("author", "username avatar");
+
+  const io = getIO();
+  io.to(`channel:${channelId}`).emit("message:new", populated);
+
+  res.status(201).json(populated);
+};</code></pre>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 9 ============ -->
+  <section class="chapter" id="s9">
+    <div class="chapter-kicker"><span class="chapter-num">09</span><span class="badge">naming</span></div>
+    <h2>Message Events — Naming Convention</h2>
+    <p class="chapter-sub"><code>resource:action</code> — a small rule that pays off as the app grows.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="color:var(--accent-soft);">Messages</h4>
+        <ul class="tight" style="margin-top:8px;"><li><code>message:new</code></li><li><code>message:update</code></li><li><code>message:delete</code></li></ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent-soft);">Channels</h4>
+        <ul class="tight" style="margin-top:8px;"><li><code>channel:join</code></li><li><code>channel:leave</code></li></ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent-soft);">Presence</h4>
+        <ul class="tight" style="margin-top:8px;"><li><code>user:typing</code></li><li><code>user:stop-typing</code></li><li><code>user:online</code></li><li><code>user:offline</code></li></ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent-soft);">Server membership</h4>
+        <ul class="tight" style="margin-top:8px;"><li><code>server:member-joined</code></li><li><code>server:member-left</code></li></ul>
+      </div>
+    </div>
+
+    <h3>Why "message:new" beats "message"</h3>
+    <p>A generic event like <code>"message"</code> forces every listener to inspect the payload just to figure out what actually happened — was it a new message? An edit? A delete? A namespaced name like <code>message:new</code> answers that question in the event name itself, so your React code can have three clean, separate listeners instead of one listener full of <code>if</code> branches. It also avoids collisions — <code>"update"</code> is a terrible, ambiguous event name in an app with users, servers, channels, <em>and</em> messages all being "updated."</p>
+
+    <div class="box remember"><div class="ic">◆</div><p><span class="box-title">Rule of thumb</span>Name every custom event <code>resource:action</code>, lowercase, hyphen-separated for multi-word actions (<code>stop-typing</code>, not <code>stopTyping</code>). Keep this consistent across the whole app — it becomes documentation on its own.</p></div>
+  </section>
+
+  <!-- ============ SECTION 10 ============ -->
+  <section class="chapter" id="s10">
+    <div class="chapter-kicker"><span class="chapter-num">10</span><span class="badge">$typing</span></div>
+    <h2>Typing Indicator</h2>
+    <p class="chapter-sub">A tiny feature that's the perfect showcase for socket.to(room).</p>
+
+    <div class="code-block">
+      <div class="code-block-head"><span class="lbl"><span class="dot-row"><span></span><span></span><span></span></span>server</span><button class="copy-btn" data-copy>copy</button></div>
+      <pre><code data-lang="js">socket.on("user:typing", ({ channelId }) => {
+  socket.to(`channel:${channelId}`).emit("user:typing", {
+    userId: socket.user._id,
+    username: socket.user.username
+  });
+});
+
+socket.on("user:stop-typing", ({ channelId }) => {
+  socket.to(`channel:${channelId}`).emit("user:stop-typing", {
+    userId: socket.user._id
+  });
+});</code></pre>
+    </div>
+
+    <div class="box remember"><div class="ic">◆</div><p><span class="box-title">Why socket.to(), not io.to()</span>The person typing already knows they're typing — their own UI shows that state locally, instantly, with no round-trip needed. Sending the event back to them too would be wasted bandwidth and a pointless self-notification. <code>socket.to(room)</code> excludes the sender for exactly this reason.</p></div>
+
+    <div class="box warn"><div class="ic">▲</div><p><span class="box-title">Practical tip</span>Debounce the <code>"user:typing"</code> emit on the client (e.g. only emit once every couple of seconds while the user keeps typing) and auto-emit <code>"user:stop-typing"</code> after a few seconds of inactivity — otherwise every keystroke fires a socket event.</p></div>
+  </section>
+
+  <!-- ============ SECTION 11 ============... (62 KB left)
