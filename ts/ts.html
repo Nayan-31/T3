@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript Fundamentals — KODEX Interactive Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,wght@0,300;0,600;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typescript/5.4.5/typescript.min.js"></script>
+<script src="https://unpkg.com/monaco-editor@0.50.0/min/vs/loader.js"></script>
+<style>
+:root {
+  --ink: #0E0F14;
+  --paper: #F5F2EB;
+  --paper2: #EDE9DF;
+  --paper3: #E4DFD3;
+  --rule: #D4CEBC;
+  --muted: #6B6455;
+  --accent: #C84B1F;
+  --accent2: #1A6B4A;
+  --accent3: #1B4587;
+  --gold: #B8860B;
+  --code-bg: #1A1C24;
+  --code-text: #E2DCCC;
+  --pit: #A63232;
+  --confuse: #7A4FA3;
+  --ok: #1A6B4A;
+  --bad: #A63232;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ FIXED SIDEBAR LAYOUT (robust: no flex on page shell) ============ */
+nav {
+  position: fixed;
+  top: 0; left: 0;
+  width: 270px;
+  height: 100vh;
+  background: var(--ink);
+  overflow-y: auto;
+  padding: 32px 0 40px;
+  z-index: 50;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+nav::-webkit-scrollbar { width: 4px; }
+nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+main {
+  display: block;
+  margin-left: 270px;
+  max-width: 860px;
+  padding: 56px 64px 140px;
+}
+main section {
+  display: block;
+  width: 100%;
+  margin-bottom: 64px;
+  scroll-margin-top: 24px;
+}
+
+.nav-brand { padding: 0 24px 28px; }
+.nav-brand .logo {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 700; color: #fff;
+}
+.nav-brand .logo span { color: var(--accent); }
+.nav-brand .sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em; margin-top: 4px;
+}
+.nav-group-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: rgba(255,255,255,0.25);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 18px 24px 8px;
+}
+nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 24px;
+  font-size: 13px; color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+nav a:hover { color: #fff; background: rgba(255,255,255,0.04); }
+nav a.active { color: #fff; border-left-color: var(--accent); background: rgba(200,75,31,0.1); }
+nav a .num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); min-width: 16px; }
+
+/* ============ HERO / HEADINGS ============ */
+.hero { margin-bottom: 48px; }
+.hero .kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--accent);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 44px; font-weight: 700; line-height: 1.1; margin-bottom: 16px;
+}
+.hero .lede { font-size: 16px; color: var(--muted); max-width: 620px; }
+.hero .meta-row {
+  display: flex; gap: 24px; margin-top: 24px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+}
+
+.step-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--accent);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
+}
+.step-label .n {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px;
+}
+h2 { font-family: 'Fraunces', serif; font-size: 27px; font-weight: 700; margin-bottom: 14px; }
+h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; margin: 20px 0 10px; }
+p { margin-bottom: 14px; font-size: 15px; }
+p.muted { color: var(--muted); }
+strong { font-weight: 600; }
+code.inline {
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--paper3); padding: 2px 6px; border-radius: 4px;
+  font-size: 0.87em; color: var(--accent3);
+}
+
+/* ============ CALLOUTS ============ */
+.box { border-radius: 10px; padding: 16px 20px; margin: 16px 0; border: 1px solid var(--rule); }
+.box-head {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 8px;
+}
+.box p { font-size: 14px; }
+.box p:last-child { margin-bottom: 0; }
+.concept { background: var(--paper2); }
+.concept .box-head { color: var(--accent3); }
+.pitfall { background: #F7EBEA; border-color: #E2B8B4; }
+.pitfall .box-head { color: var(--pit); }
+.confusion { background: #F1EAF6; border-color: #D9C4E8; }
+.confusion .box-head { color: var(--confuse); }
+.note { background: #EAF2EE; border-color: #BFDBCB; }
+.note .box-head { color: var(--accent2); }
+
+/* ============ STATIC CODE ============ */
+.code-block { background: var(--code-bg); border-radius: 10px; margin: 16px 0; overflow: hidden; }
+.code-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; background: rgba(255,255,255,0.04);
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.4);
+}
+.copy-btn {
+  background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.6);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  padding: 4px 10px; border-radius: 5px; cursor: pointer;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+pre {
+  padding: 16px 20px; overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65;
+  color: var(--code-text);
+}
+.tok-kw { color: #C87DD9; }
+.tok-type { color: #5BA4CF; }
+.tok-str { color: #A8C97F; }
+.tok-com { color: #6B7280; }
+.tok-fn { color: #F4A261; }
+
+/* ============ QUIZ (A/B choice) ============ */
+.quiz {
+  border: 2px solid var(--rule);
+  border-radius: 12px;
+  margin: 20px 0;
+  overflow: hidden;
+  background: #fff;
+}
+.quiz-head {
+  padding: 14px 20px;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.quiz-q { padding: 16px 20px 6px; font-size: 15px; font-weight: 500; }
+.quiz-q pre { background: var(--code-bg); border-radius: 8px; margin-top: 10px; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 20px 18px; }
+.choices.stack { grid-template-columns: 1fr; }
+.choice {
+  border: 2px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+.choice:hover:not(.locked) { border-color: var(--accent); transform: translateY(-2px); }
+.choice .ch-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--muted); letter-spacing: 0.08em;
+  display: block; margin-bottom: 6px;
+}
+.choice pre {
+  background: var(--code-bg); border-radius: 6px;
+  padding: 10px 12px; font-size: 12px; margin-top: 4px;
+}
+.choice.locked { cursor: default; opacity: 0.85; }
+.choice.correct { border-color: var(--ok); background: #EAF2EE; opacity: 1; }
+.choice.correct .ch-label::after { content: "  ✓ CORRECT"; color: var(--ok); }
+.choice.wrong { border-color: var(--bad); background: #F7EBEA; animation: shake 0.3s; opacity: 1; }
+.choice.wrong .ch-label::after { content: "  ✗"; color: var(--bad); }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.qfeedback { display: none; padding: 0 20px 18px; }
+.qfeedback .fb {
+  border-radius: 8px; padding: 12px 16px; font-size: 14px; display: none;
+}
+.fb-right { background: #EAF2EE; border: 1px solid #BFDBCB; }
+.fb-wrong { background: #FBF3E4; border: 1px solid #E8D5A8; }
+
+/* ============ RUNNER (live code) ============ */
+.runner { border: 2px solid var(--ink); border-radius: 12px; margin: 20px 0; overflow: hidden; }
+.runner-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; background: var(--ink);
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.5);
+}
+.runner-head .dot { color: var(--accent); }
+.run-btn {
+  background: var(--accent); border: none; color: #fff;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+  padding: 6px 16px; border-radius: 6px; cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.run-btn:hover { background: #A93C15; }
+.reset-btn {
+  background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.6);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 8px;
+}
+.runner-editor-shell {
+  display: none;
+  width: 100%;
+  min-height: 180px;
+  height: 240px;
+  resize: vertical;
+  overflow: auto;
+  background: var(--code-bg);
+}
+.runner-editor {
+  width: 100%;
+  height: 100%;
+}
+.runner.monaco-ready .runner-editor-shell { display: block; }
+.runner.monaco-ready textarea { display: none; }
+.runner textarea {
+  width: 100%; border: none; resize: vertical;
+  background: var(--code-bg); color: var(--code-text);
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65;
+  padding: 16px 20px; min-height: 120px; display: block;
+  outline: none;
+}
+.runner .output {
+  display: none;
+  background: #0A0B0F; color: #A8C97F;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.08);
+  white-space: pre-wrap;
+}
+.runner .output.err { color: #E8938A; }
+.runner .output::before {
+  content: "OUTPUT"; display: block;
+  font-size: 9px; letter-spacing: 0.12em; color: rgba(255,255,255,0.3);
+  margin-bottom: 6px;
+}
+
+/* ============ WATERMARK ============ */
+#watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'><text x='50%25' y='50%25' text-anchor='middle' transform='rotate(-30 210 150)' font-family='system-ui, sans-serif' font-size='22' fill='%230E0F14' fill-opacity='0.025'>Sheryians Coding School</text></svg>");
+  background-repeat: repeat;
+}
+.brand-badge {
+  position: fixed;
+  bottom: 20px;
+  left: 290px;
+  z-index: 45;
+  font-family: 'Fraunces', serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.brand-badge span { color: var(--accent); }
+@media (max-width: 900px) {
+  .brand-badge { left: 20px; }
+}
+
+/* ============ SCORE CHIP ============ */
+#scoreChip {
+  position: fixed; bottom: 20px; right: 20px; z-index: 100;
+  background: var(--ink); color: #fff;
+  border-radius: 999px; padding: 10px 18px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  display: flex; gap: 14px; align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+#scoreChip .r { color: #7FD1A0; }
+#scoreChip .w { color: #E8938A; }
+
+/* ============ TABLE / FOOTER ============ */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);
+  text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--rule);
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.divider { height: 1px; background: var(--rule); margin: 40px 0; }
+footer {
+  margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+  display: flex; justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  nav { display: none; }
+  main { margin-left: 0; padding: 32px 20px 120px; }
+  .hero h1 { font-size: 30px; }
+  .choices { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav id="sidenav">
+  <div class="nav-brand">
+    <div class="logo">KODEX<span>.</span></div>
+    <div class="sub">TYPESCRIPT · INTERACTIVE</div>
+  </div>
+  <div class="nav-group-label">Block 1 — Why</div>
+  <a href="#t1"><span class="num">01</span>Why TS exists</a>
+  <a href="#t1a"><span class="num">02</span>Setup TS</a>
+  <div class="nav-group-label">Block 2 — Core Types</div>
+  <a href="#t2"><span class="num">03</span>Primitives & inference</a>
+  <a href="#t3"><span class="num">04</span>Arrays & tuples</a>
+  <a href="#t4"><span class="num">05</span>Objects: interface vs type</a>
+  <a href="#t5"><span class="num">06</span>Unions & literals</a>
+  <a href="#t6"><span class="num">07</span>Narrowing</a>
+  <div class="nav-group-label">Block 3 — Functions</div>
+  <a href="#t7"><span class="num">08</span>Function typing</a>
+  <a href="#t8"><span class="num">09</span>Optional & default params</a>
+  <a href="#t9"><span class="num">10</span>any vs unknown</a>
+  <div class="nav-group-label">Block 4 — Scale</div>
+  <a href="#t10"><span class="num">11</span>enum vs literal union</a>
+  <a href="#t11"><span class="num">12</span>keyof & typeof</a>
+  <a href="#t11b"><span class="num">13</span>Classes & modifiers</a>
+  <a href="#t11c"><span class="num">14</span>Utility types: Omit & friends</a>
+  <div class="nav-group-label">Block 5 — Payoff: Express</div>
+  <a href="#t12"><span class="num">15</span>Typing req.body</a>
+  <a href="#t13"><span class="num">16</span>Request/Response types</a>
+  <a href="#t14"><span class="num">17</span>Input vs DB vs Response</a>
+  <a href="#t15"><span class="num">18</span>Fix the error — finale</a>
+</nav>
+
+<main>
+  <div class="hero">
+    <div class="kicker">Kodr · Live Class · 2 Hours · Interactive</div>
+    <h1>TypeScript Fundamentals<br>for Working Developers</h1>
+    <p class="lede">These notes are interactive — <strong>▶ Run</strong> buttons execute real code in your browser, and every topic has a two-choice challenge. Pick an answer, see instantly why it's right or wrong. Your score chip is at the bottom-right — nobody sees it but you.</p>
+    <div class="meta-row">
+      <span>⏱ 120 min</span>
+      <span>🎯 18 topics</span>
+      <span>🕹 16 challenges</span>
+    </div>
+  </div>
+
+  <!-- ============ TOPIC 1 ============ -->
+  <section id="t1">
+    <div class="step-label"><span class="n">1</span>Why TS Exists</div>
+    <h2>The problem TS solves</h2>
+    <p><strong>What it is:</strong> TypeScript is a static type checker over JavaScript that flags type and shape mistakes before runtime.</p>
+    <p>Run this plain JavaScript. It has a serious bug. Watch what JS does about it — which is <strong>nothing</strong>.</p>
+
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> demo.js — plain JavaScript</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="function total(price, qty) {
+  return price * qty;
+}
+
+console.log(total(&quot;499&quot;, undefined));">function total(price, qty) {
+  return price * qty;
+}
+
+console.log(total("499", undefined));</textarea>
+      <div class="output"></div>
+    </div>
+
+    <p><code class="inline">NaN</code>. No error, no warning — it runs and produces garbage. You'd find out in production, or worse, in front of a recruiter in a live coding round. <strong>TS moves this error from runtime (user sees it) to compile-time (you see it in your editor before you even save).</strong></p>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>TypeScript is not a new language. It's JavaScript + a checker that runs <em>before</em> your code runs, comparing the shapes of your values against the shapes you declared.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>TS errors happen at <strong>compile time</strong>. At runtime, TS is gone — it compiles down to plain JS. That's also true of the ▶ Run buttons in these notes: they strip the types and execute, so <em>runtime</em> behavior shows here, while <em>type errors</em> are what the quizzes below are for.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 01 — Pick one</div>
+      <div class="quiz-q">TypeScript makes your code run faster and more securely. True or false?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>True — types let the engine optimize</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>False — zero runtime effect, it only shifts <em>when</em> you find bugs</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Exactly. TS compiles away completely. Performance and security at runtime are untouched — it only changes when a whole class of bugs gets discovered: in your editor instead of in production.</div>
+        <div class="fb fb-wrong">❌ This is the #1 misconception. TS compiles down to plain JS — the browser/Node never sees your types. Zero runtime effect on speed or security. What changes is <em>when</em> you find bugs.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 1A ============ -->
+  <section id="t1a">
+    <div class="step-label"><span class="n">2</span>Setup</div>
+    <h2>Simple TypeScript project setup</h2>
+    <p><strong>What it is:</strong> the minimum local setup: TypeScript in the project, a <code class="inline">tsconfig.json</code>, and watch mode.</p>
+    <p class="muted">The current simplest setup is project-local TypeScript with a generated <code class="inline">tsconfig.json</code>. Start with npm, set the package type, then let the compiler drive watch mode.</p>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>For a Node project, begin with <code class="inline">npm init -y</code>, install TypeScript locally, and set <code class="inline">"type": "module"</code> in <code class="inline">package.json</code> if you want modern ESM behavior. That keeps your project aligned with the current Node + TypeScript workflow.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span>setup-ts.sh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">npm</span> init -y
+<span class="tok-kw">npm</span> install <span class="tok-type">-D</span> typescript @types/node
+<span class="tok-com"># package.json</span>
+<span class="tok-str">"type"</span>: <span class="tok-str">"module"</span>
+<span class="tok-kw">npx</span> tsc --init
+
+<span class="tok-com"># watch type-checking and keep the output visible</span>
+<span class="tok-kw">npx</span> tsc --watch --preserveWatchOutput</pre>
+    </div>
+
+    <div class="box note">
+      <div class="box-head">✅ What to run while coding</div>
+      <p>Use <code class="inline">tsc --watch</code> for continuous type-checking, and add <code class="inline">--preserveWatchOutput</code> so the log stays on screen instead of clearing on every rebuild.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>If you use <code class="inline">"type": "module"</code>, keep your runtime and compiler settings in sync. Modern Node projects usually pair it with a Node-friendly module setting in <code class="inline">tsconfig.json</code> rather than mixing module systems casually.</p>
+    </div>
+  </section>
+  <!-- ============ TOPIC 2 ============ -->
+  <section id="t2">
+    <div class="step-label"><span class="n">3</span>Core Types</div>
+    <h2>Primitives & type inference</h2>
+    <p><strong>What it is:</strong> primitives are base value categories; inference is TS auto-detecting types from assigned values.</p>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p><strong>Primitive data types</strong> are the simplest values TypeScript works with: <code class="inline">string</code>, <code class="inline">number</code>, <code class="inline">boolean</code>, <code class="inline">null</code>, <code class="inline">undefined</code>, <code class="inline">bigint</code>, and <code class="inline">symbol</code>. They are not objects and usually hold one single value.</p>
+      <p><strong>Type inference</strong> means TypeScript decides a variable's type for you from the value you assign, so you do not always need to write the type yourself.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span>primitives.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">let</span> age: <span class="tok-type">number</span> = <span class="tok-fn">25</span>;      <span class="tok-com">// explicit annotation</span>
+<span class="tok-kw">let</span> city = <span class="tok-str">"Bhopal"</span>;         <span class="tok-com">// inferred as string — no annotation needed</span>
+<span class="tok-kw">let</span> isLive: <span class="tok-type">boolean</span> = <span class="tok-kw">true</span>;</pre>
+    </div>
+
+    <p>Rule of thumb: <strong>if TS can figure it out from the value, don't annotate.</strong> Annotate when there's no initial value, or the shape isn't obvious (function params, empty arrays, API responses).</p>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>Over-annotating everything (<code class="inline">let name: string = "Ankur"</code> on every line) isn't wrong — just noisy, and in a code review it signals "doesn't trust inference."</p>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p><code class="inline">let x: number</code> (annotation — a promise about future values) vs <code class="inline">let x = 5</code> (inference — TS reading the current value). Both end up type-checked identically; only one requires writing the type.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 02 — Which one needs an annotation?</div>
+      <div class="quiz-q">One of these genuinely needs a type annotation. Which?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span><pre><span class="tok-kw">const</span> price = <span class="tok-fn">499</span>;</pre></button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span><pre><span class="tok-kw">let</span> result;
+<span class="tok-com">// assigned later inside an if</span></pre></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Right. With no initial value, TS infers <code class="inline">any</code> for <code class="inline">result</code> — the checker basically gives up on it. Option A has a value, so inference handles it perfectly.</div>
+        <div class="fb fb-wrong">❌ Option A already has a value (<code class="inline">499</code>) — TS infers <code class="inline">number</code> on its own. Option B is the trap: declared with no value, TS silently infers <code class="inline">any</code>, and type-checking is gone for that variable.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 3 ============ -->
+  <section id="t3">
+    <div class="step-label"><span class="n">4</span>Core Types</div>
+    <h2>Arrays & tuples</h2>
+    <p><strong>What it is:</strong> arrays are variable-length lists of one item type; tuples are positional lists with fixed index types.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>arrays.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">let</span> scores: <span class="tok-type">number</span>[] = [<span class="tok-fn">10</span>, <span class="tok-fn">20</span>, <span class="tok-fn">30</span>];
+scores.push(<span class="tok-fn">40</span>); <span class="tok-com">// normal array growth</span>
+
+<span class="tok-com">// tuple: fixed positions + known type per position</span>
+<span class="tok-kw">let</span> point: [<span class="tok-type">number</span>, <span class="tok-type">number</span>] = [<span class="tok-fn">28.6</span>, <span class="tok-fn">77.2</span>];
+point.push(<span class="tok-fn">99</span>); <span class="tok-com">// allowed on mutable tuples</span>
+
+<span class="tok-com">// use readonly tuple when you want to block push/pop</span>
+<span class="tok-kw">const</span> lockedPoint: <span class="tok-kw">readonly</span> [<span class="tok-type">number</span>, <span class="tok-type">number</span>] = [<span class="tok-fn">28.6</span>, <span class="tok-fn">77.2</span>];</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>Array = "any number of items, all one shape." Tuple = "positions have meaning, and each position has a known type." Tuples earn their place where order matters — like <code class="inline">useState()</code>'s <code class="inline">[value, setValue]</code>.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p><code class="inline">let point = [28.6, 77.2]</code> without annotation is inferred as <code class="inline">number[]</code> — a plain array, <strong>not</strong> a tuple. Also, mutable tuples can still allow <code class="inline">push</code>; if you want a strict "no push/pop" tuple, use <code class="inline">readonly [number, number]</code>.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 03 — Will this compile?</div>
+      <div class="quiz-q">
+        <pre><span class="tok-kw">let</span> user: [<span class="tok-type">string</span>, <span class="tok-type">number</span>] = [<span class="tok-fn">25</span>, <span class="tok-str">"Ankur"</span>];</pre>
+      </div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>✅ Compiles — both types are present in the tuple</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>❌ Errors — position matters in a tuple</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Correct. A tuple isn't a bag of allowed types — each <em>position</em> has a fixed type. Position 0 must be <code class="inline">string</code>, position 1 must be <code class="inline">number</code>. Order is the whole point of a tuple.</div>
+        <div class="fb fb-wrong">❌ Tempting — both a string and a number are there. But a tuple locks types <em>per position</em>: index 0 must be <code class="inline">string</code>, index 1 must be <code class="inline">number</code>. Swapped = two errors.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 4 ============ -->
+  <section id="t4">
+    <div class="step-label"><span class="n">5</span>Core Types</div>
+    <h2>Objects: interface vs type</h2>
+    <p><strong>What it is:</strong> both define shapes; <code class="inline">interface</code> is object-contract syntax, while <code class="inline">type</code> is general alias syntax.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>shapes.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">interface</span> User {
+  name: <span class="tok-type">string</span>;
+  age: <span class="tok-type">number</span>;
+  isAdmin?: <span class="tok-type">boolean</span>;  <span class="tok-com">// optional — the ? is doing real work</span>
+}</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>Practical rule for real MERN codebases: <strong><code class="inline">interface</code> for object shapes, <code class="inline">type</code> for everything else</strong> (unions, function signatures, tuples).</p>
+      <p><strong>Why interface exists:</strong> it models contracts between parts of your app. A controller can promise "I accept a <code class="inline">UserInput</code>", a service can promise "I return a <code class="inline">UserResponse</code>." This keeps large teams aligned because everyone codes against the same named shape.</p>
+      <p><strong>Why teams prefer it for objects:</strong> interfaces are easy to extend and can be merged across files (useful for framework types and plugin ecosystems). So object models can grow over time without rewriting every type from scratch.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span>why-interface.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-com">// 1) EXTEND existing object contracts cleanly</span>
+<span class="tok-kw">interface</span> Person {
+  name: <span class="tok-type">string</span>;
+}
+
+<span class="tok-kw">interface</span> Admin <span class="tok-kw">extends</span> Person {
+  role: <span class="tok-str">"admin"</span>;
+}
+
+<span class="tok-com">// 2) DECLARATION MERGING (same name, combined shape)</span>
+<span class="tok-kw">interface</span> RequestMeta {
+  requestId: <span class="tok-type">string</span>;
+}
+<span class="tok-kw">interface</span> RequestMeta {
+  ip: <span class="tok-type">string</span>;
+}
+
+<span class="tok-kw">const</span> meta: RequestMeta = { requestId: <span class="tok-str">"abc"</span>, ip: <span class="tok-str">"127.0.0.1"</span> };</pre>
+    </div>
+
+    <div class="box note">
+      <div class="box-head">✅ Decision Rule (simple)</div>
+      <p>Use <code class="inline">interface</code> when describing <strong>object contracts</strong> that may evolve. Use <code class="inline">type</code> when composing <strong>non-object forms</strong> like unions (<code class="inline">"open" | "closed"</code>), tuples, mapped/conditional aliases, or function signatures.</p>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p><code class="inline">{ age: number }</code> looks like a JS object literal <code class="inline">{ age: 25 }</code> but the colon means something different — it's a type annotation, not an assignment. Students coming straight from JS misread "age equals the word number."</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 04 — Fix the error</div>
+      <div class="quiz-q">This errors: <em>"Property 'isAdmin' is missing."</em> Which fix is the right instinct?
+        <pre><span class="tok-kw">interface</span> User { name: <span class="tok-type">string</span>; isAdmin: <span class="tok-type">boolean</span>; }
+<span class="tok-kw">const</span> u: User = { name: <span class="tok-str">"Riya"</span> };  <span class="tok-com">// ❌</span></pre>
+      </div>
+      <div class="choices">
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option A</span>Make it optional: <code class="inline">isAdmin?: boolean</code></button>
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option B</span>Silence it: <code class="inline">const u: any = { name: "Riya" }</code></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Right instinct. If a field genuinely may be absent, say so in the type with <code class="inline">?</code> — now the compiler protects every place that reads <code class="inline">u.isAdmin</code>, forcing an undefined-check.</div>
+        <div class="fb fb-wrong">❌ <code class="inline">any</code> makes the error disappear — along with <em>all</em> checking on <code class="inline">u</code>, forever. You didn't fix the bug, you fired the security guard. The honest fix: mark the field optional with <code class="inline">?</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 5 ============ -->
+  <section id="t5">
+    <div class="step-label"><span class="n">6</span>Core Types</div>
+    <h2>Union types & literal types</h2>
+    <p><strong>What it is:</strong> unions allow one of multiple types; literal types allow only exact values.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>unions.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">let</span> id: <span class="tok-type">string</span> | <span class="tok-type">number</span>;   <span class="tok-com">// either is fine</span>
+
+<span class="tok-com">// literal type — not "a string", but THIS exact string</span>
+<span class="tok-kw">let</span> status: <span class="tok-str">"pending"</span> | <span class="tok-str">"success"</span> | <span class="tok-str">"failed"</span>;</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>This is where TS starts feeling powerful, not just strict. A literal union turns a typo into a compile error instead of a silent bug where your if/else chain just never matches.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>Lowercase <code class="inline">string</code> is a <em>category</em> (any string). Quoted <code class="inline">"pending"</code> is a single member of that category treated as its own type. Mixing these up makes literal unions read like nonsense.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 05 — Which line errors?</div>
+      <div class="quiz-q">Given <code class="inline">let status: "pending" | "success" | "failed";</code> — which assignment fails?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span><pre>status = <span class="tok-str">"failed"</span>;</pre></button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span><pre>status = <span class="tok-str">"Pending"</span>;</pre></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Sharp eye — capital P. Literal types are exact-match, case-sensitive. <code class="inline">"Pending"</code> ≠ <code class="inline">"pending"</code>. This is exactly the class of bug that silently breaks if/else chains in plain JS — TS catches it before you run anything.</div>
+        <div class="fb fb-wrong">❌ <code class="inline">"failed"</code> is in the allowed set — that one's fine. Look closer at Option B: capital P. Literal types are exact, case-sensitive matches, and <code class="inline">"Pending"</code> isn't in the union.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 6 ============ -->
+  <section id="t6">
+    <div class="step-label"><span class="n">7</span>Core Types</div>
+    <h2>Type narrowing</h2>
+    <p><strong>What it is:</strong> narrowing is TS reducing a broad union into a specific type after runtime checks.</p>
+    <p>Narrowing is TS <em>watching your if-checks</em> and shrinking a union to one specific type inside each branch. Run this and check the output:</p>
+
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> narrowing.ts — editable, try changing the argument</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="function printId(id: string | number) {
+  if (typeof id === &quot;string&quot;) {
+    console.log(&quot;string branch:&quot;, id.toUpperCase());
+  } else {
+    console.log(&quot;number branch:&quot;, id.toFixed(2));
+  }
+}
+
+printId(&quot;abc123&quot;);
+printId(42);">function printId(id: string | number) {
+  if (typeof id === "string") {
+    console.log("string branch:", id.toUpperCase());
+  } else {
+    console.log("number branch:", id.toFixed(2));
+  }
+}
+
+printId("abc123");
+printId(42);</textarea>
+      <div class="output"></div>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p><code class="inline">typeof id === "string"</code> is plain JS that already existed — narrowing adds nothing to the compiled output. TS is just smart enough to <em>read</em> that check and adjust types inside the branch.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 06 — Will this compile?</div>
+      <div class="quiz-q">
+        <pre><span class="tok-kw">function</span> <span class="tok-fn">printId</span>(id: <span class="tok-type">string</span> | <span class="tok-type">number</span>) {
+  console.<span class="tok-fn">log</span>(id.<span class="tok-fn">toUpperCase</span>());  <span class="tok-com">// no typeof check</span>
+}</pre>
+      </div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>✅ Compiles — it <em>could</em> be a string, TS gives benefit of the doubt</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>❌ Errors — TS never assumes, you must narrow first</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Correct. TS refuses to gamble. On a <code class="inline">string | number</code>, you can only use what <em>both</em> types support — until a guard proves which one you have. That's the entire deal with unions.</div>
+        <div class="fb fb-wrong">❌ "It could be a string!" — that's exactly the reasoning TS rejects. It could also be a number, and <code class="inline">(42).toUpperCase()</code> would crash. No benefit of the doubt: narrow first, then use.</div>
+      </div>
+    </div>
+  </section>
+  <!-- ============ TOPIC 7 ============ -->
+  <section id="t7">
+    <div class="step-label"><span class="n">8</span>Functions</div>
+    <h2>Function parameter & return typing</h2>
+    <p><strong>What it is:</strong> function typing is a compile-time contract for inputs (parameters) and output (return type).</p>
+    <p>Remember the <code class="inline">total("499", undefined)</code> bug from Topic 1? Same function, now in TypeScript. The types are stripped when you hit Run — but in your editor, that call would be a red squiggle <em>before you even save</em>.</p>
+
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> functions.ts — fix the call so the output is correct</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="function total(price: number, qty: number): number {
+  return price * qty;
+}
+
+// In an editor, this line shows a red squiggle.
+// Fix the arguments, then Run:
+console.log(total(&quot;499&quot; as any, undefined as any));">function total(price: number, qty: number): number {
+  return price * qty;
+}
+
+// In an editor, this line shows a red squiggle.
+// Fix the arguments, then Run:
+console.log(total("499" as any, undefined as any));</textarea>
+      <div class="output"></div>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p>Arrow function return types go <em>after the params, before the arrow</em>: <code class="inline">const total = (price: number, qty: number): number =&gt; price * qty</code>. Students often try to place it after the arrow.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 07 — Why annotate the return type?</div>
+      <div class="quiz-q">TS can infer return types automatically. So what does writing <code class="inline">: number</code> explicitly actually buy you?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>Nothing — it's pure documentation for humans</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>It's a check on the function body — a branch returning the wrong type gets flagged</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Exactly. Declare <code class="inline">: number</code> and accidentally <code class="inline">return "done"</code> in some edge-case branch — TS flags it at the return statement. Without the annotation, TS just widens the inferred type to <code class="inline">number | string</code> and the bug travels downstream.</div>
+        <div class="fb fb-wrong">❌ It reads like documentation, but it's enforced. If any branch returns a string when you declared <code class="inline">: number</code>, the error lands exactly on that return. Without it, TS silently infers <code class="inline">number | string</code> and the problem surfaces somewhere far away.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 8 ============ -->
+  <section id="t8">
+    <div class="step-label"><span class="n">9</span>Functions</div>
+    <h2>Optional & default parameters</h2>
+    <p><strong>What it is:</strong> optional params may be omitted; default params auto-fill missing values.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>optional-params.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">function</span> <span class="tok-fn">greet</span>(name: <span class="tok-type">string</span>, greeting?: <span class="tok-type">string</span>) {
+  console.<span class="tok-fn">log</span>(`${greeting ?? <span class="tok-str">"Hello"</span>}, ${name}`);
+}
+
+<span class="tok-kw">function</span> <span class="tok-fn">greet2</span>(name: <span class="tok-type">string</span>, greeting: <span class="tok-type">string</span> = <span class="tok-str">"Hello"</span>) {
+  console.<span class="tok-fn">log</span>(`${greeting}, ${name}`);
+}</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p><code class="inline">greeting?</code> → inside the function, type is <code class="inline">string | undefined</code>, you handle the fallback. Default value <code class="inline">= "Hello"</code> → inside the function it's just <code class="inline">string</code>, because TS knows the fallback already ran.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 08 — Which signature is legal?</div>
+      <div class="quiz-q">One of these is a straight-up syntax error. Which one <strong>works</strong>?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span><pre><span class="tok-kw">function</span> <span class="tok-fn">f</span>(a?: <span class="tok-type">string</span>, b: <span class="tok-type">number</span>) {}</pre></button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span><pre><span class="tok-kw">function</span> <span class="tok-fn">f</span>(b: <span class="tok-type">number</span>, a?: <span class="tok-type">string</span>) {}</pre></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Optional params must come <em>after</em> required ones. Think about the call site: <code class="inline">f(5)</code> — if the optional came first, which parameter did 5 fill? Ambiguous, so TS bans it.</div>
+        <div class="fb fb-wrong">❌ Option A is the error: "a required parameter cannot follow an optional parameter." Reason: at the call site <code class="inline">f(5)</code>, TS couldn't tell whether 5 is <code class="inline">a</code> or <code class="inline">b</code>. Optionals always go last.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 9 ============ -->
+  <section id="t9">
+    <div class="step-label"><span class="n">10</span>Functions</div>
+    <h2>any vs unknown</h2>
+    <p><strong>What it is:</strong> both can hold any value, but <code class="inline">any</code> disables checks while <code class="inline">unknown</code> requires proof before use.</p>
+    <p><strong>The single most important topic in this class.</strong> Both can hold anything — the difference is what happens next.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>any-vs-unknown.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">let</span> a: <span class="tok-type">any</span> = <span class="tok-fn">JSON</span>.<span class="tok-fn">parse</span>(<span class="tok-str">"{}"</span>);
+a.<span class="tok-fn">anything</span>();   <span class="tok-com">// ✅ compiles — then explodes at runtime</span>
+
+<span class="tok-kw">let</span> u: <span class="tok-type">unknown</span> = <span class="tok-fn">JSON</span>.<span class="tok-fn">parse</span>(<span class="tok-str">"{}"</span>);
+u.<span class="tok-fn">anything</span>();   <span class="tok-com">// ❌ compile error — prove what it is first</span></pre>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p><code class="inline">any</code> is a type-safety black hole — it silently disables checking on everything <em>derived</em> from it. One <code class="inline">any</code> from a bad API response can erase type safety across an entire file. If you're tempted to write <code class="inline">any</code> to make an error go away, reach for <code class="inline">unknown</code> and ask why the compiler is confused.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 09 — Translate to plain language</div>
+      <div class="quiz-q">What does <code class="inline">any</code> actually say to the compiler?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>"This value can be any of the known types — check it flexibly"</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>"Stop doing your job for this variable — and everything it touches"</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Brutal but accurate. <code class="inline">any</code> isn't a flexible wildcard — it's an off-switch, and it spreads: everything derived from an <code class="inline">any</code> becomes <code class="inline">any</code> too. The "flexible wildcard that's still checked" you were imagining? That's <code class="inline">unknown</code>.</div>
+        <div class="fb fb-wrong">❌ That's what everyone assumes — and that description actually fits <code class="inline">unknown</code>, which stays safe by forcing a check before use. <code class="inline">any</code> is the opposite: checking fully off, and it spreads to everything derived from it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 10 ============ -->
+  <section id="t10">
+    <div class="step-label"><span class="n">11</span>Working at Scale</div>
+    <h2>enum vs union of literals</h2>
+    <p><strong>What it is:</strong> <code class="inline">enum</code> creates a runtime object; a literal union is a compile-time-only set of allowed values.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>enum-vs-union.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">enum</span> Role { Admin = <span class="tok-str">"ADMIN"</span>, User = <span class="tok-str">"USER"</span> }
+
+<span class="tok-com">// the modern preference:</span>
+<span class="tok-kw">type</span> Role2 = <span class="tok-str">"ADMIN"</span> | <span class="tok-str">"USER"</span>;</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p><strong>Simple rule:</strong> both restrict values to a fixed set, but they behave differently.</p>
+      <p><code class="inline">enum</code> exists at runtime as an object. A literal union exists only during type-checking.</p>
+      <p>Use literal unions by default in app code. Use <code class="inline">enum</code> when you need a shared named constant object at runtime.</p>
+    </div>
+
+    <div class="box note">
+      <div class="box-head">✅ What is enum?</div>
+      <p>An <code class="inline">enum</code> is a named set of constants. TypeScript also generates a JavaScript object for it.</p>
+      <p>Example: <code class="inline">enum Role { Admin = "ADMIN", User = "USER" }</code> lets you write <code class="inline">Role.Admin</code> in code and also use <code class="inline">Role</code> at runtime.</p>
+      <p>Equivalent union type check: <code class="inline">type Role = "ADMIN" | "USER"</code> (no runtime object generated).</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 10 — Predict, then run below to verify</div>
+      <div class="quiz-q">You compile a file containing an <code class="inline">enum</code>. Does the enum appear in the output JavaScript?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>No — all TS syntax is erased at compile time</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>Yes — enum is the exception, it generates a real JS object</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Correct — and this makes <code class="inline">enum</code> weird. Almost every TS construct vanishes on compile, but enum generates a real lookup object in your bundle. Verify it yourself in the runner below.</div>
+        <div class="fb fb-wrong">❌ Great rule, wrong exception. "Types are erased" is true for interfaces, unions, annotations — but <code class="inline">enum</code> breaks it: it compiles to a real JS object that ships in your bundle. See for yourself below.</div>
+      </div>
+    </div>
+
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> proof.ts — the enum survives compilation as a runtime object</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="enum Role { Admin = &quot;ADMIN&quot;, User = &quot;USER&quot; }
+
+// If types were fully erased, this line would crash —
+// there'd be no `Role` at runtime. But:
+console.log(Role);
+console.log(&quot;Role.Admin at runtime:&quot;, Role.Admin);">enum Role { Admin = "ADMIN", User = "USER" }
+
+// If types were fully erased, this line would crash —
+// there'd be no `Role` at runtime. But:
+console.log(Role);
+console.log("Role.Admin at runtime:", Role.Admin);</textarea>
+      <div class="output"></div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 11 ============ -->
+  <section id="t11">
+    <div class="step-label"><span class="n">12</span>Working at Scale</div>
+    <h2>keyof & typeof</h2>
+    <p><strong>What it is:</strong> <code class="inline">keyof T</code> gives a union of property names of <code class="inline">T</code>; type-position <code class="inline">typeof v</code> gives the type shape of value <code class="inline">v</code>.</p>
+    <p class="muted">Goal: just enough to <em>read</em> real codebases confidently. Not a generics deep-dive.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>keyof-typeof.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">interface</span> User { name: <span class="tok-type">string</span>; age: <span class="tok-type">number</span>; }
+
+<span class="tok-kw">type</span> UserKeys = <span class="tok-kw">keyof</span> User;      <span class="tok-com">// ?</span>
+
+<span class="tok-kw">const</span> config = { port: <span class="tok-fn">3000</span>, env: <span class="tok-str">"dev"</span> };
+<span class="tok-kw">type</span> ConfigType = <span class="tok-kw">typeof</span> config;  <span class="tok-com">// { port: number; env: string }</span></pre>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>Type-position <code class="inline">typeof</code> and Topic 6's runtime <code class="inline">typeof</code> are the <strong>same keyword doing two completely different jobs</strong> depending on whether it appears inside a type annotation or in normal code. Point at both examples side by side when someone looks lost.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 11 — What is UserKeys?</div>
+      <div class="quiz-q">Given the interface above, what does <code class="inline">keyof User</code> produce?</div>
+      <div class="choices">
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option A</span><pre><span class="tok-str">"name"</span> | <span class="tok-str">"age"</span></pre></button>
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option B</span><pre><span class="tok-type">string</span> | <span class="tok-type">number</span></pre></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ <code class="inline">keyof</code> extracts the <em>key names</em> as a literal union — not the value types. Option B would be the value types, which is a different tool. Payoff: when the interface changes, the derived union updates automatically instead of going stale.</div>
+        <div class="fb fb-wrong">❌ You grabbed the <em>value</em> types. <code class="inline">keyof</code> takes the <em>key names</em>: <code class="inline">"name" | "age"</code> as string literals. Notice it connects two things you already learned — keys extracted into a literal union (Topic 5).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 11B — CLASSES ============ -->
+  <section id="t11b">
+    <div class="step-label"><span class="n">13</span>Working at Scale</div>
+    <h2>Classes & access modifiers</h2>
+    <p><strong>What it is:</strong> TS classes are JS classes + typed fields, access modifiers (<code class="inline">public</code>/<code class="inline">private</code>/<code class="inline">protected</code>/<code class="inline">readonly</code>), and constructor shorthand.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>classes.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">class</span> <span class="tok-type">UserService</span> {
+  <span class="tok-com">// long form: declare fields, assign in constructor</span>
+  <span class="tok-kw">private</span> db: <span class="tok-type">Database</span>;
+  <span class="tok-kw">readonly</span> serviceName = <span class="tok-str">"users"</span>;
+
+  <span class="tok-kw">constructor</span>(db: <span class="tok-type">Database</span>) {
+    <span class="tok-kw">this</span>.db = db;
+  }
+}
+
+<span class="tok-com">// constructor SHORTHAND — modifier on the param creates + assigns the field</span>
+<span class="tok-kw">class</span> <span class="tok-type">UserService2</span> {
+  <span class="tok-kw">constructor</span>(<span class="tok-kw">private</span> db: <span class="tok-type">Database</span>, <span class="tok-kw">readonly</span> serviceName = <span class="tok-str">"users"</span>) {}
+}
+
+<span class="tok-com">// classes can IMPLEMENT an interface — the contract from Topic 5</span>
+<span class="tok-kw">interface</span> Repo {
+  <span class="tok-fn">findById</span>(id: <span class="tok-type">string</span>): <span class="tok-type">Promise</span>&lt;<span class="tok-type">unknown</span>&gt;;
+}
+<span class="tok-kw">class</span> <span class="tok-type">UserRepo</span> <span class="tok-kw">implements</span> <span class="tok-type">Repo</span> {
+  <span class="tok-kw">async</span> <span class="tok-fn">findById</span>(id: <span class="tok-type">string</span>) { <span class="tok-kw">return</span> {} }
+}</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>Two things TS adds over JS classes: <strong>access modifiers</strong> (who can touch a field) and <strong>constructor parameter shorthand</strong> (writing <code class="inline">private db: Database</code> in the constructor declares the field AND assigns it — one line instead of three). You'll see the shorthand everywhere in NestJS-style dependency injection.</p>
+      <p><strong>Class vs interface:</strong> an interface is a type-only contract (erased at compile time). A class is <em>both</em> a type and a runtime value — it produces real JS. That's why a class can <code class="inline">implements</code> an interface: the interface says <em>what</em>, the class provides <em>how</em>.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p><strong><code class="inline">private</code> is compile-time only.</strong> It stops <em>your TypeScript code</em> from accessing the field — but after compilation the field is a completely normal, fully accessible JS property. If you need true runtime privacy, that's JavaScript's own <code class="inline">#field</code> syntax, which actually enforces it in the engine. Demo this in the runner below — it surprises everyone.</p>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p>"If I have interfaces, why do I need classes?" — Interfaces describe shape; classes bundle shape + behavior + construction. Use an interface when you just need a contract (API payloads, function params). Reach for a class when you need instances with methods, shared logic, or dependency injection. In typical MERN route/controller code, you'll write far more interfaces than classes — that's normal.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 12 — Does private survive?</div>
+      <div class="quiz-q">A field is marked <code class="inline">private apiKey: string</code>. After the TS is compiled to JS and running in Node — can other code read <code class="inline">obj.apiKey</code>?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>No — private means the runtime blocks access</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>Yes — <code class="inline">private</code> is erased with the other types; it's a normal JS property at runtime</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Correct — and this matters for security thinking. <code class="inline">private</code> is a message to the compiler and your teammates, not to the runtime. Never rely on it to protect secrets. True runtime privacy is JS's <code class="inline">#field</code> syntax. Same "types are erased" rule from Topic 1, applied to modifiers.</div>
+        <div class="fb fb-wrong">❌ Feels like it should, right? But <code class="inline">private</code> is erased at compile time along with every other type annotation — at runtime it's a plain property anyone can read. If you need the engine to actually enforce privacy, that's JS's native <code class="inline">#field</code>. Run the proof below.</div>
+      </div>
+    </div>
+
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> private-proof.ts — TS private vs JS #private at runtime</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="class Vault {
+  private tsSecret = &quot;ts-private-123&quot;;   // TS-only privacy
+  #jsSecret = &quot;js-private-456&quot;;          // real runtime privacy
+}
+
+const v: any = new Vault();
+
+// TS 'private' — erased at compile time, readable at runtime:
+console.log(&quot;tsSecret leaked:&quot;, v.tsSecret);
+
+// JS '#field' — the engine itself enforces it:
+console.log(&quot;jsSecret via v['#jsSecret']:&quot;, v[&quot;#jsSecret&quot;]); // undefined">class Vault {
+  private tsSecret = "ts-private-123";   // TS-only privacy
+  #jsSecret = "js-private-456";          // real runtime privacy
+}
+
+const v: any = new Vault();
+
+// TS 'private' — erased at compile time, readable at runtime:
+console.log("tsSecret leaked:", v.tsSecret);
+
+// JS '#field' — the engine itself enforces it:
+console.log("jsSecret via v['#jsSecret']:", v["#jsSecret"]); // undefined</textarea>
+      <div class="output"></div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 11C — UTILITY TYPES ============ -->
+  <section id="t11c">
+    <div class="step-label"><span class="n">14</span>Working at Scale</div>
+    <h2>Utility types: Partial, Pick, Omit</h2>
+    <p><strong>What it is:</strong> built-in type transformers that derive new types from existing ones — instead of writing near-duplicate shapes by hand.</p>
+    <p>This is <code class="inline">keyof</code>'s payoff. You already have a <code class="inline">User</code> type — utility types let you carve new shapes out of it that stay in sync automatically.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>utility-types.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">interface</span> User {
+  id: <span class="tok-type">string</span>;
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+  password: <span class="tok-type">string</span>;
+}
+
+<span class="tok-com">// Partial — every field becomes optional. Perfect for PATCH updates:</span>
+<span class="tok-kw">type</span> UserUpdate = <span class="tok-type">Partial</span>&lt;User&gt;;
+<span class="tok-com">// { id?: string; name?: string; email?: string; password?: string }</span>
+
+<span class="tok-com">// Pick — keep ONLY these keys:</span>
+<span class="tok-kw">type</span> UserPreview = <span class="tok-type">Pick</span>&lt;User, <span class="tok-str">"id"</span> | <span class="tok-str">"name"</span>&gt;;
+<span class="tok-com">// { id: string; name: string }</span>
+
+<span class="tok-com">// Omit — keep everything EXCEPT these keys:</span>
+<span class="tok-kw">type</span> SafeUser = <span class="tok-type">Omit</span>&lt;User, <span class="tok-str">"password"</span>&gt;;
+<span class="tok-com">// { id: string; name: string; email: string }</span></pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>Rule of thumb: <strong>Pick when you want a few fields, Omit when you want to remove a few fields, Partial for update payloads.</strong> The win over hand-writing the shape: add a field to <code class="inline">User</code> tomorrow, and <code class="inline">SafeUser</code> updates itself — a hand-written duplicate silently goes stale. Same source-of-truth idea as <code class="inline">keyof</code>/<code class="inline">typeof</code>, one level up.</p>
+      <p><strong>This connects directly to the next block:</strong> your API's response type can be <em>derived</em> — <code class="inline">type UserResponse = Omit&lt;UserDoc, "hashedPassword" | "_id"&gt; &amp; { id: string }</code> — instead of written by hand and hoped-kept-in-sync.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p><strong><code class="inline">Omit</code> doesn't error on keys that don't exist.</strong> <code class="inline">Omit&lt;User, "pasword"&gt;</code> (typo!) compiles fine and silently omits nothing — the password stays in the type. <code class="inline">Pick</code> is stricter and rejects unknown keys. If you want typo-safe omission, that's exactly why some teams write <code class="inline">Omit&lt;User, keyof Pick&lt;User, "password"&gt;&gt;</code> patterns — but for this class, just know: double-check your Omit keys.</p>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion</div>
+      <p><code class="inline">Partial&lt;User&gt;</code> makes fields optional <em>in the type</em> — it doesn't fill in defaults or merge objects at runtime. Students write a PATCH handler with <code class="inline">Partial&lt;User&gt;</code> and expect the missing fields to "keep old values" automatically. That merge is your job (<code class="inline">{ ...existing, ...update }</code>) — Partial just makes the compiler allow the missing fields.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 13 — Pick the right tool</div>
+      <div class="quiz-q">You're building the response type for <code class="inline">GET /users/:id</code>. It should be the full <code class="inline">User</code> minus <code class="inline">password</code>. Which derives it best?</div>
+      <div class="choices">
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option A</span><pre><span class="tok-kw">type</span> Res = <span class="tok-type">Omit</span>&lt;User, <span class="tok-str">"password"</span>&gt;;</pre></button>
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option B</span><pre><span class="tok-kw">type</span> Res = <span class="tok-type">Partial</span>&lt;User&gt;;</pre></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Right tool. Omit removes exactly the dangerous field and keeps the rest <em>required</em> — the response contract stays strong. And when <code class="inline">User</code> grows a new safe field next sprint, <code class="inline">Res</code> picks it up automatically.</div>
+        <div class="fb fb-wrong">❌ <code class="inline">Partial</code> makes <em>everything</em> optional — including fields your response always sends. Worse: <code class="inline">password</code> is still in the type, just optional, so nothing stops it leaking. You wanted removal, not optionality: that's <code class="inline">Omit&lt;User, "password"&gt;</code>.</div>
+      </div>
+    </div>
+  </section>
+  <!-- ============ TOPIC 12 ============ -->
+  <section id="t12">
+    <div class="step-label"><span class="n">15</span>Payoff: Express</div>
+    <h2>Typing req.body, req.params, req.query</h2>
+    <p><strong>What it is:</strong> adding explicit types to request params, body, and query so handlers know exact input shapes.</p>
+    <p>Everything so far was setup for this block. Here's the moment TS meets your actual Express code.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>route.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-kw">import</span> <span class="tok-kw">type</span> { Request, Response } <span class="tok-kw">from</span> <span class="tok-str">"express"</span>;
+
+<span class="tok-kw">interface</span> CreateUserBody {
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+}
+
+<span class="tok-com">// Request&lt;Params, ResBody, ReqBody, ReqQuery&gt; — positional!</span>
+app.<span class="tok-fn">post</span>(<span class="tok-str">"/users"</span>, (req: Request&lt;{}, {}, CreateUserBody&gt;, res: Response) =&gt; {
+  <span class="tok-kw">const</span> { name, email } = req.body; <span class="tok-com">// fully typed, autocomplete works</span>
+});</pre>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>The generic slots are <strong>positional and easy to get backwards</strong> — it's <code class="inline">Request&lt;Params, ResBody, ReqBody, ReqQuery&gt;</code>. Skip the first two <code class="inline">{}</code> placeholders and you've typed <code class="inline">req.params</code> as your body shape.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 14 — Spot the mistake</div>
+      <div class="quiz-q">A student writes <code class="inline">Request&lt;CreateUserBody&gt;</code> and complains that <code class="inline">req.body</code> is still <code class="inline">any</code>. What actually happened?</div>
+      <div class="choices">
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option A</span>The first slot is <code class="inline">Params</code> — they typed the URL params, not the body</button>
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option B</span><code class="inline">@types/express</code> must be broken — reinstall node_modules</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Exactly. Slot 1 = <code class="inline">Params</code>, slot 2 = <code class="inline">ResBody</code>, slot 3 = <code class="inline">ReqBody</code>. Their body type landed in the params slot, and body stayed <code class="inline">any</code>. Fix: <code class="inline">Request&lt;{}, {}, CreateUserBody&gt;</code>.</div>
+        <div class="fb fb-wrong">❌ Reinstalling node_modules is the classic panic move — but nothing's broken. The generic is positional: slot 1 is <code class="inline">Params</code>, and their body type went there. Body needs slot 3: <code class="inline">Request&lt;{}, {}, CreateUserBody&gt;</code>.</div>
+      </div>
+    </div>
+
+    <div class="box confusion">
+      <div class="box-head">🌀 Common Confusion — say this out loud in class</div>
+      <p>Typing <code class="inline">req.body</code> does <strong>not validate anything at runtime</strong>. It's a promise to the compiler, not a guard against a malicious request — TS trusts your annotation even if the client sends garbage. Runtime validation (Zod, Joi, manual checks) is a separate, still-necessary step. Nobody should walk out thinking TS = input validation.</p>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 13 ============ -->
+  <section id="t13">
+    <div class="step-label"><span class="n">16</span>Payoff: Express</div>
+    <h2>Request / Response types from Express</h2>
+    <p><strong>What it is:</strong> using Express-provided TypeScript types to annotate middleware and route handlers consistently.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>imports.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-com">// idiomatic type-only import — zero runtime presence, fully erased</span>
+<span class="tok-kw">import</span> <span class="tok-kw">type</span> { Request, Response, NextFunction } <span class="tok-kw">from</span> <span class="tok-str">"express"</span>;</pre>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>Without <code class="inline">@types/express</code> installed, these types fail to resolve or silently fall back to <code class="inline">any</code>. Students think "TS isn't working" — really the type definitions were never installed. First debugging step whenever Express types feel dead: check <code class="inline">package.json</code>.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 15 — Why the separate package?</div>
+      <div class="quiz-q">Why does Express need <code class="inline">@types/express</code> at all, when packages like Mongoose don't need a separate types package?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>It's a paid add-on the Express team publishes for TS users</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>Express is written in plain JS — the community maintains its type definitions separately</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Right. Express predates TS's dominance and ships no types of its own. The community (DefinitelyTyped) maintains <code class="inline">@types/express</code>. Libraries written in TS — like modern Mongoose — bundle their own types, so no extra install.</div>
+        <div class="fb fb-wrong">❌ Nothing paid — it's free and community-maintained (the DefinitelyTyped project). The real reason: Express is written in plain JS with no built-in types, so someone had to describe its shapes to TS. TS-native libraries bundle their own.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 14 ============ -->
+  <section id="t14">
+    <div class="step-label"><span class="n">17</span>Payoff: Express</div>
+    <h2>One shape isn't enough: Input vs DB vs Response</h2>
+    <p><strong>What it is:</strong> separate type models for incoming payloads, stored database documents, and outgoing API responses.</p>
+    <p>The highest-value pattern in the session — it maps directly to a bug every student will ship: trusting <code class="inline">req.body</code> blindly and leaking DB fields in responses.</p>
+
+    <div class="code-block">
+      <div class="code-head"><span>user.types.ts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="tok-com">// what the CLIENT sends — no id, no timestamps, raw password</span>
+<span class="tok-kw">interface</span> UserInput {
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+  password: <span class="tok-type">string</span>;
+}
+
+<span class="tok-com">// what MongoDB stores — _id, hashedPassword, timestamps</span>
+<span class="tok-kw">interface</span> UserDoc {
+  _id: Types.ObjectId;
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+  hashedPassword: <span class="tok-type">string</span>;
+  createdAt: Date;
+}
+
+<span class="tok-com">// what you SEND BACK — never the password. ever.</span>
+<span class="tok-kw">interface</span> UserResponse {
+  id: <span class="tok-type">string</span>;
+  name: <span class="tok-type">string</span>;
+  email: <span class="tok-type">string</span>;
+}</pre>
+    </div>
+
+    <div class="box concept">
+      <div class="box-head">💡 Concept</div>
+      <p>A "user" isn't one type — it's a different shape at every stage of its life. Input (raw, untrusted) → DB doc (full, internal fields) → response (trimmed, safe). Naming these separately forces a conscious decision about what crosses each boundary, instead of leaking <code class="inline">hashedPassword</code> because one loose type got reused everywhere.</p>
+    </div>
+
+    <div class="box note">
+      <div class="box-head">✅ Now that you know Omit</div>
+      <p>You don't have to hand-write <code class="inline">UserResponse</code> anymore. Derive it from the source of truth: <code class="inline">type UserResponse = Omit&lt;UserDoc, "hashedPassword" | "_id" | "createdAt"&gt; &amp; { id: string }</code>. Add a safe field to <code class="inline">UserDoc</code> tomorrow, and the response type updates itself — while <code class="inline">hashedPassword</code> stays permanently excluded.</p>
+    </div>
+
+    <div class="box pitfall">
+      <div class="box-head">⚠ Pitfall</div>
+      <p>Real bug from building this pattern: importing a bare <code class="inline">ObjectId</code> from mongoose vs <code class="inline">Types.ObjectId</code> — two different classes with the same name from different namespaces, producing a confusing structural mismatch error. Always <code class="inline">Types.ObjectId</code> for Mongoose documents.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Challenge 16 — Catch the security bug</div>
+      <div class="quiz-q">A teammate writes this login handler. What's wrong?
+        <pre><span class="tok-kw">const</span> user: UserDoc = <span class="tok-kw">await</span> UserModel.<span class="tok-fn">findOne</span>({ email });
+res.<span class="tok-fn">json</span>(user);</pre>
+      </div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Option A</span>Nothing — the data came from our own trusted database</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Option B</span>It ships <code class="inline">hashedPassword</code> to the client — a UserDoc crossed the response boundary</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ This is the whole point of three shapes. <code class="inline">UserDoc</code> includes <code class="inline">hashedPassword</code> — sending it raw exposes hashes to every client (and every logging proxy in between). The fix: map to a <code class="inline">UserResponse</code> before <code class="inline">res.json()</code>. Trusted source ≠ safe to expose.</div>
+        <div class="fb fb-wrong">❌ "Trusted database" is exactly the trap — the question isn't whether the <em>data</em> is trustworthy, it's whether every field should <em>reach the client</em>. <code class="inline">hashedPassword</code> just got shipped to the browser. Map to <code class="inline">UserResponse</code> first.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC 15 ============ -->
+  <section id="t15">
+    <div class="step-label"><span class="n">18</span>Finale</div>
+    <h2>Fix the error — rapid fire</h2>
+    <p><strong>What it is:</strong> short drills to practice reading TS errors and choosing root-cause fixes.</p>
+    <p>Three real TS errors. For each: read the error, pick the right fix. This is the exact skill that makes TS errors stop being scary.</p>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Finale 1 of 3</div>
+      <div class="quiz-q"><em>"Argument of type 'string' is not assignable to parameter of type 'number'."</em>
+        <pre><span class="tok-fn">total</span>(<span class="tok-str">"499"</span>, <span class="tok-fn">2</span>);</pre>
+      </div>
+      <div class="choices">
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Fix A</span>Convert at the source: <code class="inline">total(Number("499"), 2)</code></button>
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Fix B</span>Assert it away: <code class="inline">total("499" as any, 2)</code></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ You fixed the actual problem — the value really was the wrong type, so convert it. <code class="inline">as any</code> would have made the <em>error</em> disappear while keeping the <em>bug</em>: "499" * 2 happens to work via coercion, until one day it doesn't.</div>
+        <div class="fb fb-wrong">❌ <code class="inline">as any</code> silences the compiler but the string is still a string — you kept the bug and deleted the warning. When TS says types disagree, the fix is almost always at the data, not at the annotation.</div>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Finale 2 of 3</div>
+      <div class="quiz-q"><em>"Property 'toUpperCase' does not exist on type 'string | number'."</em>
+        <pre><span class="tok-kw">function</span> <span class="tok-fn">show</span>(id: <span class="tok-type">string</span> | <span class="tok-type">number</span>) {
+  <span class="tok-kw">return</span> id.<span class="tok-fn">toUpperCase</span>();
+}</pre>
+      </div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Fix A</span>Change the param to <code class="inline">id: any</code></button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Fix B</span>Narrow first: <code class="inline">if (typeof id === "string")</code></button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ The error was TS protecting you — <code class="inline">id</code> might be a number, and <code class="inline">(42).toUpperCase()</code> crashes at runtime. Narrowing handles both cases honestly. <code class="inline">any</code> would compile fine and crash in production the first time a number arrives.</div>
+        <div class="fb fb-wrong">❌ With <code class="inline">any</code> it compiles — and then crashes at runtime the first time someone passes a number. The error message told you exactly what's missing: proof that <code class="inline">id</code> is a string. That proof is a <code class="inline">typeof</code> narrow.</div>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-head">🕹 Finale 3 of 3</div>
+      <div class="quiz-q"><em>"Property 'isAdmin' is missing in type '{ name: string; }' but required in type 'User'."</em> The API you're consuming genuinely doesn't always send <code class="inline">isAdmin</code>. Best fix?</div>
+      <div class="choices">
+        <button class="choice" onclick="pick(this,false)"><span class="ch-label">Fix A</span>Always fake it: <code class="inline">{ name, isAdmin: false }</code> — hardcode a default at every call site</button>
+        <button class="choice" data-c="1" onclick="pick(this,true)"><span class="ch-label">Fix B</span>Make the type honest: <code class="inline">isAdmin?: boolean</code> — the type should describe reality</button>
+      </div>
+      <div class="qfeedback">
+        <div class="fb fb-right">✅ Key principle to end on: <strong>types should describe reality, not force reality to fake it.</strong> If the field genuinely may be absent, the type says so — and now every consumer is forced to handle the missing case. Hardcoding <code class="inline">false</code> at call sites invents data and hides the truth.</div>
+        <div class="fb fb-wrong">❌ Hardcoding <code class="inline">isAdmin: false</code> everywhere invents data that doesn't exist — and if 5 call sites do it, one of them will eventually invent <code class="inline">true</code>. The honest fix: the type should describe reality (<code class="inline">?</code>), and let the compiler force consumers to handle absence.</div>
+      </div>
+    </div>
+
+    <div class="box note">
+      <div class="box-head">✅ Closing note for students</div>
+      <p>Every error you just fixed follows one shape: <strong>TS compares the type you promised against the type you're actually using, and tells you exactly where they disagree.</strong> Once you can read that sentence, you can read almost any TS error — including the scary ones with generics in them. And notice: in every single challenge, <code class="inline">as any</code> was on the ballot and it was never the answer.</p>
+    </div>
+
+    <h3>Free playground</h3>
+    <p class="muted">Anything you want to try before class ends — edit and run:</p>
+    <div class="runner">
+      <div class="runner-head">
+        <span><span class="dot">●</span> playground.ts</span>
+        <span>
+          <button class="reset-btn" onclick="resetRunner(this)">Reset</button>
+          <button class="run-btn" onclick="runCode(this)">▶ Run</button>
+        </span>
+      </div>
+      <textarea spellcheck="false" data-original="type Status = &quot;pending&quot; | &quot;success&quot; | &quot;failed&quot;;
+
+function report(status: Status, count: number): string {
+  return `${count} requests are ${status}`;
+}
+
+console.log(report(&quot;pending&quot;, 12));">type Status = "pending" | "success" | "failed";
+
+function report(status: Status, count: number): string {
+  return `${count} requests are ${status}`;
+}
+
+console.log(report("pending", 12));</textarea>
+      <div class="output"></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <footer>
+    <span>Kodr · TypeScript Fundamentals · Interactive</span>
+    <span>Sheryians Coding School · KODEX Teaching Notes</span>
+  </footer>
+</main>
+
+<div id="watermark"></div>
+<div class="brand-badge">Sheryians <span>Coding School</span></div>
+
+<div id="scoreChip">
+  <span>SCORE</span>
+  <span class="r">✓ <span id="scoreRight">0</span></span>
+  <span class="w">✗ <span id="scoreWrong">0</span></span>
+</div>
+
+<script>
+/* ---------- copy for static code blocks ---------- */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const t = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = t; }, 1500);
+  });
+}
+
+/* ---------- A/B quiz ---------- */
+let scoreR = 0, scoreW = 0;
+function pick(btn, correct) {
+  const card = btn.closest('.quiz');
+  if (card.dataset.done) return;
+  card.dataset.done = "1";
+  card.querySelectorAll('.choice').forEach(c => c.classList.add('locked'));
+  if (correct) {
+    btn.classList.add('correct');
+    scoreR++;
+  } else {
+    btn.classList.add('wrong');
+    const right = card.querySelector('.choice[data-c="1"]');
+    if (right) right.classList.add('correct');
+    scoreW++;
+  }
+  const fbWrap = card.querySelector('.qfeedback');
+  fbWrap.style.display = 'block';
+  fbWrap.querySelector(correct ? '.fb-right' : '.fb-wrong').style.display = 'block';
+  document.getElementById('scoreRight').textContent = scoreR;
+  document.getElementById('scoreWrong').textContent = scoreW;
+}
+
+const monacoCdnBase = 'https://unpkg.com/monaco-editor@0.50.0/min';
+let monacoEditorsReady = false;
+
+function initMonacoEditors() {
+  if (monacoEditorsReady || !window.monaco || !monaco.editor) return;
+  monacoEditorsReady = true;
+
+  monaco.editor.defineTheme('kodex-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [],
+    colors: {
+      'editor.background': '#1A1C24',
+      'editor.foreground': '#E2DCCC',
+      'editorLineNumber.foreground': '#5E6474',
+      'editorLineNumber.activeForeground': '#C8CBD1',
+      'editorCursor.foreground': '#C84B1F',
+      'editor.selectionBackground': '#2D4A68',
+      'editor.inactiveSelectionBackground': '#232836',
+      'editor.lineHighlightBackground': '#20232E',
+      'editorIndentGuide.background1': '#2F3442',
+      'editorIndentGuide.activeBackground1': '#454C5E'
+    }
+  });
+
+  if (monaco.languages && monaco.languages.typescript) {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      noEmit: true,
+      strict: true,
+    });
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      noEmit: true,
+      strict: true,
+    });
+  }
+
+  document.querySelectorAll('.runner').forEach((wrap) => {
+    const ta = wrap.querySelector('textarea');
+    if (!ta || wrap.dataset.monacoInit === 'true') return;
+
+    const shell = document.createElement('div');
+    shell.className = 'runner-editor-shell';
+    const mount = document.createElement('div');
+    mount.className = 'runner-editor';
+    shell.appendChild(mount);
+    ta.insertAdjacentElement('beforebegin', shell);
+
+    const editor = monaco.editor.create(mount, {
+      value: ta.value,
+      language: 'typescript',
+      theme: 'kodex-dark',
+      automaticLayout: true,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      fontSize: 13,
+      lineHeight: 22,
+      wordWrap: 'on',
+      renderLineHighlight: 'none',
+      padding: { top: 16, bottom: 16 },
+      tabSize: 2,
+      insertSpaces: true,
+      contextmenu: false,
+      overviewRulerBorder: false,
+      hideCursorInOverviewRuler: true,
+    });
+
+    wrap._monacoEditor = editor;
+    wrap._monacoTextarea = ta;
+    wrap.dataset.monacoInit = 'true';
+    wrap.classList.add('monaco-ready');
+  });
+}
+
+if (window.require) {
+  window.require.config({ paths: { vs: monacoCdnBase + '/vs' } });
+  window.MonacoEnvironment = {
+    getWorkerUrl: function () {
+      const workerSource = `
+        self.MonacoEnvironment = { baseUrl: '${monacoCdnBase}/' };
+        importScripts('${monacoCdnBase}/vs/base/worker/workerMain.js');
+      `;
+      return URL.createObjectURL(new Blob([workerSource], { type: 'text/javascript' }));
+    }
+  };
+  window.require(['vs/editor/editor.main'], initMonacoEditors);
+}
+
+/* ---------- live TS runner ---------- */
+function fmt(v) {
+  if (typeof v === 'object' && v !== null) {
+    try { return JSON.stringify(v, null, 1).replace(/\n\s*/g, ' '); }
+    catch(e) { return String(v); }
+  }
+  return String(v);
+}
+function runCode(btn) {
+  const wrap = btn.closest('.runner');
+  const editor = wrap._monacoEditor;
+  const src = editor ? editor.getValue() : wrap.querySelector('textarea').value;
+  const out = wrap.querySelector('.output');
+  const logs = [];
+  const fakeConsole = {
+    log:   (...a) => logs.push(a.map(fmt).join(' ')),
+    error: (...a) => logs.push('⛔ ' + a.map(fmt).join(' ')),
+    warn:  (...a) => logs.push('⚠ ' + a.map(fmt).join(' ')),
+  };
+  out.classList.remove('err');
+  try {
+    let js = src;
+    if (window.ts && typeof ts.transpileModule === 'function') {
+      js = ts.transpileModule(src, { compilerOptions: { target: 'ES2020' } }).outputText;
+    }
+    new Function('console', js)(fakeConsole);
+    out.textContent = logs.length ? logs.join('\n') : '(ran, but no console output)';
+  } catch (e) {
+    out.classList.add('err');
+    out.textContent = (logs.length ? logs.join('\n') + '\n' : '') + '💥 ' + e.message;
+  }
+  out.style.display = 'block';
+}
+function resetRunner(btn) {
+  const wrap = btn.closest('.runner');
+  const ta = wrap.querySelector('textarea');
+  const editor = wrap._monacoEditor;
+  const nextValue = ta.dataset.original;
+  ta.value = nextValue;
+  if (editor) editor.setValue(nextValue);
+  const out = wrap.querySelector('.output');
+  out.style.display = 'none';
+  out.textContent = '';
+}
+
+/* ---------- scroll-spy ---------- */
+const sections = document.querySelectorAll('main section');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(sec => observer.observe(sec));
+</script>
+</body>
+</html>
