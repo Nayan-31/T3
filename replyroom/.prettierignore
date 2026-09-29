@@ -1,0 +1,8 @@
+# Generated files aur local document corpus.
+node_modules/
+.next/
+.data/
+
+# npm lockfile aur environment files manually format nahi karte.
+package-lock.json
+.env*
