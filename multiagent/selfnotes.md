@@ -92,3 +92,83 @@ Blackboard / Shared Workspace Pattern : Blackboard / Shared Workspace Pattern me
 
 
 Hybrid Pattern : Hybrid Pattern me ek hi multi-agent system ke andar do ya usse zyada orchestration patterns combine kiye jate hain, taaki different parts of task ko unke liye suitable pattern se handle kiya ja sake. Example ke liye, pehle Router Agent decide kare ki request research wali hai, phir Supervisor task ko AWS, Azure aur GCP research me divide kare, ye three research agents parallel me kaam karein, aur end me Reviewer Agent final answer evaluate kare. Yaha Routing + Supervisor-Worker + Parallel + Evaluator patterns ek saath use ho rahe hain. Is pattern ka benefit flexibility aur better task handling hai, kyunki har stage ke liye best approach use kar sakte ho. Drawback ye hai ki system complex ho jata hai, debugging mushkil ho sakti hai, aur multiple agents/patterns ki wajah se token cost aur coordination overhead badh sakta hai.
+
+Memory vs Context : Context wo information hoti hai jo agent ko current run me abhi visible hai, jaise current user message, recent conversation, tool result, ya current state. Memory wo information hoti hai jo save ki ja sakti hai aur future me zarurat padne par retrieve karke context me laayi ja sakti hai. Simple words me: Context = abhi kya dikh raha hai, aur Memory = kya saved hai jo baad me kaam aa sakta hai.
+
+// Memory Types 
+
+
+1. Short-Term Memory
+Short-Term Memory current conversation ki temporary yaad hoti hai. Example ke liye, user bolta hai, “My name is Rahul,” aur kuch messages baad poochta hai, “Mera naam kya hai?” Agent current conversation dekhkar “Rahul” bol deta hai. Ye information usually current session ya recent conversation tak useful hoti hai; ye zaroori nahi ki bahut future tak permanently save rahe.
+
+2. Working Memory
+Working Memory wo temporary information hoti hai jo agent current task complete karne ke liye beech me maintain karta hai. Example ke liye, agent report bana raha hai aur uske paas plan hai, kuch research notes hain, aur pending tasks ki list hai. Ye sab final answer nahi hain, lekin current task ko organize karne aur next step decide karne me help karte hain. Simple analogy me, ye agent ka rough work / scratchpad samjho.
+
+3. Long-Term Memory
+Long-Term Memory wo information hoti hai jo current conversation ke baad bhi persist reh sakti hai aur future tasks me retrieve ki ja sakti hai. Example: user prefers TypeScript, project ka tech stack MERN hai, ya kisi project ka important configuration. Ye information database, vector database, document store, ya key-value store me save ho sakti hai. Simple words me, Long-Term Memory = future ke liye permanently ya long duration tak saved information.
+
+
+4. Episodic Memory
+Episodic Memory past me kya hua tha, yani previous experiences ki memory hoti hai. Example: “Last deployment fail hua tha kyunki Dockerfile missing tha.” Future deployment ke time agent is past experience ko yaad karke Dockerfile pehle check kar sakta hai. Simple way me, Episodic Memory = past events aur experiences ki yaad.
+
+
+5. Semantic Memory
+Semantic Memory facts, concepts aur general knowledge ki memory hoti hai, na ki kisi specific past event ki. Example: company policies, API documentation, product knowledge, ya internal knowledge base. Agar agent ko pata hai ki “Company refunds 30 days ke andar allowed hain,” toh ye semantic memory ka example hai. Simple words me, Semantic Memory = facts aur knowledge jo agent jaanta ya retrieve kar sakta hai.
+
+\\Shared Memory vs Private Memory 
+
+Shared Memory :  wo memory hoti hai jise multiple agents access kar sakte hain. Example ke liye, ek common company knowledge base jisme product docs, policies, ya project information saved ho. Research Agent, Support Agent aur Writer Agent sab zarurat ke hisaab se same shared memory se information le sakte hain. Simple words me, Shared Memory = common notebook jo sab agents dekh sakte hain.
+
+Private Memory : sirf kisi specific agent ke liye hoti hai. Example ke liye, Research Agent ke apne notes, Billing Agent ke payment-related details, ya HR Agent ke sensitive conversations. Doosre agents ko ye memory automatically access nahi karni chahiye. Simple words me, Private Memory = personal notebook jo sirf ek specific agent ke paas hai.
+
+\\ Agent Communication 
+
+Agent Communication : Agent Communication ka matlab hai ki multiple agents ek dusre ke saath information, task, result ya control share karte hain taaki poora workflow coordinate ho sake. Jaise Research Agent ne information collect ki aur Writer Agent ko deni hai, toh dono ke beech communication zaroori hai. Ye communication direct message, shared state, event, queue, tool call, handoff, API, protocol ya database ke through ho sakti hai. Simple words me, agent communication = ek agent dusre agent ko useful information ya instruction bhej raha hai.
+
+Possible Ways : 
+
+Direct messages
+Shared state
+Events
+Queues
+Tool calls
+Handoffs
+APIs
+Protocol
+Database
+
+Alag communication methods ko simple way me samjho: 
+
+ Direct message me ek agent directly dusre agent ko message bhejta hai;
+ shared state me agents common state read/write karte hain;
+ events me ek agent event fire karta hai aur interested agents react karte hain;
+ queues me tasks line me store hote hain aur workers unhe pick karte hain; 
+ tool calls ke through agent kisi external capability ko invoke karta hai; 
+ handoff me responsibility aur control next agent ko transfer hota hai; 
+ APIs ke through agents/services network par communicate karte hain; 
+ protocol communication ka fixed rule/format hota hai; 
+ aur database common persistent information store karne ke liye use ho sakta hai.
+
+\\ Structured Communication 
+
+Structured Communication ka matlab hai agents ke beech messages ko fixed format/schema me bhejna, instead of random free text. Free text jaise "Bro maine research kar liya..." human ko samajh aa sakta hai, lekin production system me parser confuse ho sakta hai, field missing ho sakti hai, ya next agent ko exact information extract karna mushkil ho sakta hai. Isliye better hai ki agents predictable JSON structure use karein, jaise:
+
+{
+  "status": "completed",
+  "findings": [
+    {
+      "claim": "Example finding",
+      "source": "Example source"
+    }
+  ],
+  "missing_information": []
+}
+
+Benifits :
+
+Is structure me next agent ko clearly pata hai status kaha milega, 
+findings kis field me hain, aur koi information missing hai ya nahi. 
+Isse validation easy hoti hai kyunki check kar sakte ho ki required fields present hain; 
+parsing easy hoti hai kyunki code directly response.findings access kar sakta hai; 
+testing easy hoti hai kyunki expected structure fixed hai; predictability badhti hai kyunki har agent same format follow karta hai; aur logging easy hoti hai kyunki structured data ko database ya monitoring system me cleanly store kiya ja sakta hai.
+
