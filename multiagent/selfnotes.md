@@ -142,7 +142,7 @@ Alag communication methods ko simple way me samjho:
  Direct message me ek agent directly dusre agent ko message bhejta hai;
  shared state me agents common state read/write karte hain;
  events me ek agent event fire karta hai aur interested agents react karte hain;
- queues me tasks line me store hote hain aur workers unhe pick karte hain; 
+ queues me tasks line me "store hote" hain aur workers unhe pick karte hain; 
  tool calls ke through agent kisi external capability ko invoke karta hai; 
  handoff me responsibility aur control next agent ko transfer hota hai; 
  APIs ke through agents/services network par communicate karte hain; 
@@ -170,5 +170,41 @@ Is structure me next agent ko clearly pata hai status kaha milega,
 findings kis field me hain, aur koi information missing hai ya nahi. 
 Isse validation easy hoti hai kyunki check kar sakte ho ki required fields present hain; 
 parsing easy hoti hai kyunki code directly response.findings access kar sakta hai; 
-testing easy hoti hai kyunki expected structure fixed hai; predictability badhti hai kyunki har agent same format follow karta hai; aur logging easy hoti hai kyunki structured data ko database ya monitoring system me cleanly store kiya ja sakta hai.
+testing easy hoti hai kyunki expected structure fixed hai; 
+predictability badhti hai kyunki har agent same format follow karta hai; 
+aur logging easy hoti hai kyunki structured data ko database ya monitoring system me cleanly store kiya ja sakta hai.
 
+
+\\Contracts between agents 
+
+
+Contracts Between Agents ka matlab hai ki agents ke beech data exchange ka format pehle se fixed hota hai, bilkul API contract ki tarah. Example ke liye, agar Research Agent ka output hamesha summary, sources, confidence aur missingInfo ke form me aayega, toh Writer Agent ko already pata hoga ki usse kaunsi information kahan milegi. Isse next agent ko random text samajhne ya guess karne ki zarurat nahi padti. Agar contract na ho, toh Research Agent kabhi paragraph de sakta hai, kabhi alag JSON structure, aur kabhi required field miss kar sakta hai, jisse workflow messy ho sakta hai. Isliye contracts system ko predictable, testable aur reliable banate hain. Short me, "contract = ek fixed agreement ki ek agent dusre agent ko exactly kis structure me data dega."
+
+interface ResearchResult {
+  summary: string;
+  sources: Source[];
+  confidence: number;
+  missingInfo: string[];
+}
+
+
+
+\\ Tool selection 
+
+Tool Selection ka matlab hai ki har agent ko sirf wahi tools diye jaye jo uske kaam ke liye actually useful hain. Agar ek hi agent ke paas 100 tools hon, jaise search_web, search_email, search_database, create_ticket, delete_ticket etc., toh LLM ke liye sahi tool choose karna difficult ho sakta hai aur galat tool call hone ke chances badh jaate hain. Isliye better approach ye hai ki agents ko specialize karo: Research Agent ko sirf web_search aur file_search, Email Agent ko gmail_search aur gmail_send, aur Database Agent ko read_db do. Isse har agent ka tool set chhota aur clear rehta hai, decision simple hota hai, errors kam hote hain aur system zyada predictable banta hai. Short me, specialized agent ko specialized tools do, sab tools sab agents ko mat do. ye hum Tools field me dete hai
+
+ResearchAgent:
+  web_search
+  file_search
+
+EmailAgent:
+  gmail_search
+  gmail_send
+
+DatabaseAgent:
+  read_db
+
+
+\\ Least Privilege
+
+Least Privilege ka matlab hai ki kisi agent ko sirf utni hi permission do jitni uske kaam ke liye zaroori hai, usse zyada nahi. Example ke liye, agar Research Agent ka kaam sirf web aur documents se information collect karna hai, toh usko read web aur read docs permission enough hai. Usko database admin access, users delete karne ki permission, payment send karne ka access, ya production shell dena unnecessary aur risky hoga. Agar agent se mistake ho jaye, prompt injection ho, ya wrong tool choose ho, toh extra permissions ki wajah se damage zyada ho sakta hai. Isliye least privilege system ko secure banata hai by limiting what each agent is allowed to do.
